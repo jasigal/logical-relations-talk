@@ -107,18 +107,21 @@ Substitution of $N$ for $x$ in $M$ in a capture-avoiding way, denoted $M[x := N]
 \]
 
 \[
-\infer{\Gamma \vdash f(M_1, \ldots, M_n) : \sigma}{\Gamma \vdash M_1 : \tau_1 \quad \ldots \quad \Gamma \vdash M_n : \tau_n \quad f : (\tau_1, \ldots, \tau_n) \rightarrow \sigma \in \Sigma_{\text{func}}}
+\infer{\Gamma \vdash f(M_1, \ldots, M_n) : \sigma}{\Gamma \vdash M_1 : \tau_1 & \ldots & \Gamma \vdash M_n : \tau_n & f : (\tau_1, \ldots, \tau_n) \rightarrow \sigma \in \Sigma_{\text{func}}}
 \]
 
 \[
 \infer{\Gamma \vdash \lambda x : \alpha. M : \alpha \rightarrow \beta}{\Gamma, x : \alpha \vdash M : \beta}
-\qquad\infer{\Gamma \vdash M \, N : \beta}{\Gamma \vdash M : \alpha \rightarrow \beta \quad \Gamma \vdash N : \alpha}
+\qquad
+\infer{\Gamma \vdash M \, N : \beta}{\Gamma \vdash M : \alpha \rightarrow \beta & \Gamma \vdash N : \alpha}
 \]
 
 \[
-\infer{\Gamma \vdash \langle M_1, M_2 \rangle : \alpha_1 \times \alpha_2}{\Gamma \vdash M_1 : \alpha \quad \Gamma \vdash M_2 : \alpha_2}
-\qquad\infer{\Gamma \vdash \pi_1(M) : \alpha_1}{\Gamma \vdash M : \alpha_1 \times \alpha_2}
-\qquad\infer{\Gamma \vdash \pi_2(M) : \alpha_2}{\Gamma \vdash M : \alpha_1 \times \alpha_2}
+\infer{\Gamma \vdash \langle M_1, M_2 \rangle : \alpha_1 \times \alpha_2}{\Gamma \vdash M_1 : \alpha & \Gamma \vdash M_2 : \alpha_2}
+\qquad
+\infer{\Gamma \vdash \pi_1(M) : \alpha_1}{\Gamma \vdash M : \alpha_1 \times \alpha_2}
+\qquad
+\infer{\Gamma \vdash \pi_2(M) : \alpha_2}{\Gamma \vdash M : \alpha_1 \times \alpha_2}
 \]
 \end{frame}
 
@@ -189,5 +192,37 @@ Equations-in-contexts allow us to perform equational reasoning while respecting 
 \]
 \end{frame}
 
+\begin{frame}
+\frametitle{Rules for Binary Products*}
+
+\[
+\infer[\text{(Proj1)}]{\Gamma \vdash \pi_1(\langle M_1, M_2 \rangle) = M_1 : \alpha_1}{\Gamma \vdash M_1 : \alpha_1 & \Gamma \vdash M_2 : \alpha_2}
+\]
+
+\[
+\infer[\text{(Proj2)}]{\Gamma \vdash \pi_2(\langle M_1, M_2 \rangle) = M_2 : \alpha_2}{\Gamma \vdash M_1 : \alpha_1 & \Gamma \vdash M_2 : \alpha_2}
+\]
+
+\[
+\infer[\text{($\eta$-Prod)}]{\Gamma \vdash \langle \pi_1(P), \pi_2(P) \rangle = P : \alpha_1 \times \alpha_2}{\Gamma \vdash P : \alpha_1 \times \alpha_2}
+\]
+\end{frame}
+
+\begin{frame}
+\frametitle{Rules for Functions*}
+
+\[
+\infer[\text{($\beta$-Eq)}]{\Gamma \vdash (\lambda x : \alpha. M) \, N = M[x := N] : \beta}{\Gamma \vdash N : \alpha}
+\]
+
+\[
+\infer[\text{($\eta$-Eq)}]{\Gamma \vdash \lambda x : \alpha. (M \, x) = M : \alpha \rightarrow \beta}{x \not\in \text{FV}(M)}
+\]
+
+\[
+\infer[\text{($\lambda$-Cong)}]{\Gamma \vdash \lambda x : \alpha. M = \lambda x : \alpha. N : \alpha \rightarrow \beta}{\Gamma, x : \alpha \vdash M = N : \beta}
+\]
+
+\end{frame}
 
 \end{document}
