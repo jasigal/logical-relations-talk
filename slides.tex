@@ -20,12 +20,13 @@ Slides with $*$ at the end of their title were written with the help of GPT 4o.
 \begin{frame}
 \frametitle{Types*}
 \[
-\alpha, \beta ::= \tau \mid \alpha_1 \times \alpha_2 \mid \alpha \rightarrow \beta
+\alpha, \beta ::= \tau \mid 1 \mid \alpha_1 \times \alpha_2 \mid \alpha \rightarrow \beta
 \]
 
 Where:
 \begin{itemize}
     \item $\tau$ is a ground type from a fixed set of symbols, e.g.\ $\{\text{Int}, \text{Bool}, \ldots\},$
+    \item $1$ is the unit type,
     \item $\alpha_1 \times \alpha_2$ is a product type,
     \item $\alpha \rightarrow \beta$ is a function type.
 \end{itemize}
@@ -52,6 +53,7 @@ M, N ::= x \mid c \mid f(M_1, \ldots, M_n) \mid \lambda x: \alpha. M \mid M \, N
 Where:
 \begin{itemize}
     \item $x$ is a variable from a countably infinite set $\{x, y, z, \ldots \}$,
+    \item $\langle \rangle$ is the term of type $1$,
     \item $c$ is a constant symbol in $\Sigma_{\text{const}}$,
     \item $f$ is a function symbol in $\Sigma_{\text{func}}$,
     \item $\lambda x: \alpha. M$ is lambda abstraction with $\alpha$ is a type,
@@ -66,6 +68,7 @@ Where:
 The function $\text{FV}(M)$ is defined recursively as follows:
 \begin{itemize}
     \item $\text{FV}(x) = \{x\}$
+    \item $\text{FV}(\langle \rangle) = \emptyset$
     \item $\text{FV}(c) = \emptyset$
     \item $\text{FV}(f(M_1, \ldots, M_n)) = \bigcup_{i=1}^{n} \text{FV}(M_i)$
     \item $\text{FV}(\lambda x: \alpha. M) = \text{FV}(M) \setminus \{x\}$
@@ -84,6 +87,7 @@ Substitution of $N$ for $x$ in $M$ in a capture-avoiding way, denoted $M[x := N]
 \begin{itemize}
     \item $x[x := N] = N$
     \item $y[x := N] = y$, for $y \neq x$
+    \item $\langle \rangle[x := N] = \langle \rangle$
     \item $c[x := N] = c$
     \item $f(M_1, \ldots, M_n)[x := N] = f(M_1[x := N], \ldots, M_n[x := N]))$
     \item $(M \, P)[x := N] = (M[x := N]) \, (P[x := N])$
@@ -103,7 +107,10 @@ Substitution of $N$ for $x$ in $M$ in a capture-avoiding way, denoted $M[x := N]
 
 \[
 \infer{\Gamma \vdash x : \alpha}{(x : \alpha) \in \Gamma}
-\qquad\infer{\Gamma \vdash c : \tau}{c : \tau \in \Sigma_{\text{const}}}
+\qquad
+\infer{\Gamma \vdash \langle \rangle : 1}{}
+\qquad
+\infer{\Gamma \vdash c : \tau}{c : \tau \in \Sigma_{\text{const}}}
 \]
 
 \[
@@ -132,6 +139,7 @@ Substitution of $N$ for $x$ in $M$ in a capture-avoiding way, denoted $M[x := N]
 
 \begin{itemize}
     \item $\llbracket \tau \rrbracket = G_\tau$
+    \item $\llbracket 1 \rrbracket = \{\star\}$
     \item $\llbracket \alpha_1 \times \alpha_2 \rrbracket = \llbracket \alpha_1 \rrbracket \times \llbracket \alpha_2 \rrbracket$
     \item $\llbracket \alpha \rightarrow \beta \rrbracket = \llbracket \alpha \rrbracket \rightarrow \llbracket \beta \rrbracket$
 \end{itemize}
@@ -139,6 +147,7 @@ Substitution of $N$ for $x$ in $M$ in a capture-avoiding way, denoted $M[x := N]
 \textbf{Interpretation of Terms} (given environment $\rho$):
 \begin{itemize}
     \item $\llbracket x \rrbracket_\rho = \rho(x)$
+    \item $\llbracket \langle \rangle \rrbracket_\rho = \star$
     \item $\llbracket c \rrbracket_\rho = c$
     \item $\llbracket f(M_1, \ldots, M_n) \rrbracket_\rho = f(\llbracket M_1 \rrbracket_\rho, \ldots, \llbracket M_n \rrbracket_\rho)$
     \item $\llbracket \lambda x : \alpha. M \rrbracket_\rho = \lambda a \in \llbracket \alpha \rrbracket. \llbracket M \rrbracket_{\rho[x := a]}$
@@ -193,7 +202,11 @@ Equations-in-contexts allow us to perform equational reasoning while respecting 
 \end{frame}
 
 \begin{frame}
-\frametitle{Rules for Binary Products*}
+\frametitle{Rules for Unit and Binary Products*}
+
+\[
+\infer[\text{(Unit-Eq)}]{\Gamma \vdash M = \langle\rangle : 1}{\Gamma \vdash M : 1}
+\]
 
 \[
 \infer[\text{(Proj1)}]{\Gamma \vdash \pi_1(\langle M_1, M_2 \rangle) = M_1 : \alpha_1}{\Gamma \vdash M_1 : \alpha_1 & \Gamma \vdash M_2 : \alpha_2}
