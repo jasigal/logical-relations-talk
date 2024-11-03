@@ -142,32 +142,6 @@ Substitution of $N$ for $x$ in $M$ in a capture-avoiding way, denoted $M[x := N]
 \end{frame}
 
 \begin{frame}
-\frametitle{Denotational Semantics*}
-
-\textbf{Interpretation of Types}:
-
-\begin{itemize}
-    \item $\llbracket \tau \rrbracket = G_\tau$
-    \item $\llbracket 1 \rrbracket = \{\star\}$
-    \item $\llbracket \alpha_1 \times \alpha_2 \rrbracket = \llbracket \alpha_1 \rrbracket \times \llbracket \alpha_2 \rrbracket$
-    \item $\llbracket \alpha \rightarrow \beta \rrbracket = \llbracket \alpha \rrbracket \rightarrow \llbracket \beta \rrbracket$
-\end{itemize}
-
-\textbf{Interpretation of Terms} (given environment $\rho$):
-\begin{itemize}
-    \item $\llbracket x \rrbracket_\rho = \rho(x)$
-    \item $\llbracket \langle \rangle \rrbracket_\rho = \star$
-    \item $\llbracket c \rrbracket_\rho = c$
-    \item $\llbracket f(M_1, \ldots, M_n) \rrbracket_\rho = f(\llbracket M_1 \rrbracket_\rho, \ldots, \llbracket M_n \rrbracket_\rho)$
-    \item $\llbracket \lambda x : \alpha. M \rrbracket_\rho = \lambda a \in \llbracket \alpha \rrbracket. \llbracket M \rrbracket_{\rho[x := a]}$
-    \item $\llbracket M \, N \rrbracket_\rho = \llbracket M \rrbracket_\rho (\llbracket N \rrbracket_\rho)$
-    \item $\llbracket \langle M_1, M_2 \rangle \rrbracket_\rho = (\llbracket M_1 \rrbracket_\rho, \llbracket M_2 \rrbracket_\rho)$
-    \item $\llbracket \pi_1(M) \rrbracket_\rho = \pi_1(\llbracket M \rrbracket_\rho)$
-    \item $\llbracket \pi_2(M) \rrbracket_\rho = \pi_2(\llbracket M \rrbracket_\rho)$
-\end{itemize}
-\end{frame}
-
-\begin{frame}
 \frametitle{Equations-in-Context*}
 
 An equation-in-context is expressed as:
@@ -246,6 +220,33 @@ Equations-in-contexts allow us to perform equational reasoning while respecting 
 \]
 
 \end{frame}
+
+\begin{frame}
+\frametitle{Denotational Semantics*}
+
+\textbf{Interpretation of Types}:
+
+\begin{itemize}
+    \item $\llbracket \tau \rrbracket = G_\tau$
+    \item $\llbracket 1 \rrbracket = \{\star\}$
+    \item $\llbracket \alpha_1 \times \alpha_2 \rrbracket = \llbracket \alpha_1 \rrbracket \times \llbracket \alpha_2 \rrbracket$
+    \item $\llbracket \alpha \rightarrow \beta \rrbracket = \llbracket \alpha \rrbracket \rightarrow \llbracket \beta \rrbracket$
+\end{itemize}
+
+\textbf{Interpretation of Terms} (given environment $\rho$):
+\begin{itemize}
+    \item $\llbracket x \rrbracket_\rho = \rho(x)$
+    \item $\llbracket \langle \rangle \rrbracket_\rho = \star$
+    \item $\llbracket c \rrbracket_\rho = c$
+    \item $\llbracket f(M_1, \ldots, M_n) \rrbracket_\rho = f(\llbracket M_1 \rrbracket_\rho, \ldots, \llbracket M_n \rrbracket_\rho)$
+    \item $\llbracket \lambda x : \alpha. M \rrbracket_\rho = \lambda a \in \llbracket \alpha \rrbracket. \llbracket M \rrbracket_{\rho[x := a]}$
+    \item $\llbracket M \, N \rrbracket_\rho = \llbracket M \rrbracket_\rho (\llbracket N \rrbracket_\rho)$
+    \item $\llbracket \langle M_1, M_2 \rangle \rrbracket_\rho = (\llbracket M_1 \rrbracket_\rho, \llbracket M_2 \rrbracket_\rho)$
+    \item $\llbracket \pi_1(M) \rrbracket_\rho = \pi_1(\llbracket M \rrbracket_\rho)$
+    \item $\llbracket \pi_2(M) \rrbracket_\rho = \pi_2(\llbracket M \rrbracket_\rho)$
+\end{itemize}
+\end{frame}
+
 
 \begin{frame}
 \frametitle{References}
