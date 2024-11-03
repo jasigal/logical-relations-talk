@@ -13,7 +13,12 @@
 \end{frame}
 
 \begin{frame}
-\frametitle{Types}
+\frametitle{Attribution}
+Slides with $*$ at the end of their title were written with the help of GPT 4o.
+\end{frame}
+
+\begin{frame}
+\frametitle{Types*}
 \[
 \alpha, \beta ::= \tau \mid \alpha_1 \times \alpha_2 \mid \alpha \rightarrow \beta
 \]
@@ -38,7 +43,7 @@ Everything is defined with respect to a signature $\Sigma$.
 \end{frame}
 
 \begin{frame}
-\frametitle{Syntax}
+\frametitle{Syntax*}
 
 \[
 M, N ::= x \mid c \mid f(M_1, \ldots, M_n) \mid \lambda x: \alpha. M \mid M \, N \mid \langle M_1, M_2 \rangle \mid \pi_1(M) \mid \pi_2(M)
@@ -57,7 +62,7 @@ Where:
 \end{frame}
 
 \begin{frame}
-\frametitle{Free variables}
+\frametitle{Free variables*}
 The function $\text{FV}(M)$ is defined recursively as follows:
 \begin{itemize}
     \item $\text{FV}(x) = \{x\}$
@@ -72,7 +77,7 @@ The function $\text{FV}(M)$ is defined recursively as follows:
 \end{frame}
 
 \begin{frame}
-\frametitle{Capture-avoiding substitution}
+\frametitle{Capture-avoiding substitution*}
 
 Substitution of $N$ for $x$ in $M$ in a capture-avoiding way, denoted $M[x := N]$, is defined recursively as follows:
 
@@ -94,7 +99,7 @@ Substitution of $N$ for $x$ in $M$ in a capture-avoiding way, denoted $M[x := N]
 \end{frame}
 
 \begin{frame}
-\frametitle{Typing Judgments}
+\frametitle{Typing Judgments*}
 
 \[
 \infer{\Gamma \vdash x : \alpha}{(x : \alpha) \in \Gamma}
@@ -118,7 +123,7 @@ Substitution of $N$ for $x$ in $M$ in a capture-avoiding way, denoted $M[x := N]
 \end{frame}
 
 \begin{frame}
-\frametitle{Denotational Semantics}
+\frametitle{Denotational Semantics*}
 
 \textbf{Interpretation of Types}:
 
@@ -139,7 +144,50 @@ Substitution of $N$ for $x$ in $M$ in a capture-avoiding way, denoted $M[x := N]
     \item $\llbracket \pi_1(M) \rrbracket_\rho = \pi_1(\llbracket M \rrbracket_\rho)$
     \item $\llbracket \pi_2(M) \rrbracket_\rho = \pi_2(\llbracket M \rrbracket_\rho)$
 \end{itemize}
-
 \end{frame}
+
+\begin{frame}
+\frametitle{Equations-in-Context*}
+
+An equation-in-context is expressed as:
+\[
+\Gamma \vdash M = N : \alpha
+\]
+
+The judgments means that in the type context $\Gamma$, the terms $M$ and $N$ are considered equal and both have type $\alpha$.
+
+\medskip
+
+Equations-in-contexts allow us to perform equational reasoning while respecting the types assigned to the variables involved.
+\end{frame}
+
+\begin{frame}
+\frametitle{Equational Reasoning Rules*}
+
+\[
+\infer[\text{(Refl)}]{\Gamma \vdash M = M : \alpha}{\Gamma \vdash M : \alpha}
+\]
+
+\[
+\infer[\text{(Sym)}]{\Gamma \vdash N = M : \alpha}{\Gamma \vdash M = N : \alpha}
+\]
+
+\[
+\infer[\text{(Trans)}]{\Gamma \vdash M = P : \alpha}{\Gamma \vdash M = N : \alpha & \Gamma \vdash N = P : \alpha}
+\]
+\end{frame}
+
+\begin{frame}
+\frametitle{Weakening and Substitution Rules*}
+
+\[
+\infer[\text{(Weak)}]{\Gamma, x : \beta \vdash M = N : \alpha}{\Gamma \vdash M = N : \alpha}
+\]
+
+\[
+\infer[\text{(Subs)}]{\Gamma \vdash M[x := P] = N[x := P] : \alpha}{\Gamma, x : \beta \vdash M = N : \alpha & \Gamma \vdash P : \beta}
+\]
+\end{frame}
+
 
 \end{document}
