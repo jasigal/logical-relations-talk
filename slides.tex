@@ -1,10 +1,16 @@
 \documentclass[aspectratio=169]{beamer}
 
-\usepackage{amsmath,amssymb,bussproofs,proof,stmaryrd}
+\usepackage[style=authoryear]{biblatex}
+\usepackage{amsmath}
+\usepackage{amssymb}
+\usepackage{proof}
+\usepackage{stmaryrd}
 
 \title{Introduction to Proving Stuff\textsuperscript{\texttrademark} with Logical Relations}
 \author{Jesse Sigal}
 \date{November 7, 2024}
+
+\addbibresource{refs.bib}
 
 \begin{document}
 
@@ -14,7 +20,10 @@
 
 \begin{frame}
 \frametitle{Attribution}
-Slides with $*$ at the end of their title were written with the help of GPT 4o.
+\begin{itemize}
+\item Slides with $*$ at the end of their title were written with the help of GPT 4o.
+\item Most things for the calculus are in line with \cite{Crole_1994}.
+\end{itemize}
 \end{frame}
 
 \begin{frame}
@@ -236,6 +245,12 @@ Equations-in-contexts allow us to perform equational reasoning while respecting 
 \infer[\text{($\lambda$-Cong)}]{\Gamma \vdash \lambda x : \alpha. M = \lambda x : \alpha. N : \alpha \rightarrow \beta}{\Gamma, x : \alpha \vdash M = N : \beta}
 \]
 
+\end{frame}
+
+\begin{frame}
+\frametitle{References}
+
+\printbibliography
 \end{frame}
 
 \end{document}
