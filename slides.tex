@@ -247,6 +247,81 @@ Equations-in-contexts allow us to perform equational reasoning while respecting 
 \end{itemize}
 \end{frame}
 
+\begin{frame}
+\frametitle{Set Theoretic Denotational Semantics for Types*}
+
+\[
+\llbracket \alpha \rrbracket_\rho =
+\begin{cases}
+\rho(\tau) & \text{if } \alpha = \tau \\
+\{\star\} & \text{if } \alpha = 1 \\
+\llbracket \alpha_1 \rrbracket_\rho \times \llbracket \alpha_2 \rrbracket_\rho & \text{if } \alpha = \alpha_1 \times \alpha_2 \\
+\llbracket \alpha \rrbracket_\rho \rightarrow \llbracket \beta \rrbracket_\rho & \text{if } \alpha = \alpha \rightarrow \beta
+\end{cases}
+\]
+
+Where:
+\begin{itemize}
+    \item $\rho$ is an interpretation function that assigns a set $\rho(\tau)$ to each ground type $\tau$, e.g., $\rho(\text{Int}) = \mathbb{Z}$, $\rho(\text{Bool}) = \{ \text{true}, \text{false} \}$.
+    \item $\{\star\}$ is the singleton set representing the unit type.
+    \item $\times$ denotes the Cartesian product of sets.
+    \item $\rightarrow$ denotes the set of all functions from one set to another.
+\end{itemize}
+\end{frame}
+
+\begin{frame}
+\frametitle{Set Theoretic Denotational Semantics for Terms in Context*}
+
+In a context $\Gamma = x_1 : \alpha_1, \ldots, x_n : \alpha_n$, the denotational semantics of a term $M$ is a function:
+
+\[
+\llbracket \Gamma \vdash M : \alpha \rrbracket : \llbracket \alpha_1 \rrbracket_\rho \times \cdots \times \llbracket \alpha_n \rrbracket_\rho \to \llbracket \alpha \rrbracket_\rho
+\]
+
+Where:
+\begin{itemize}
+    \item The interpretation of variables in context $\Gamma$ is given by a substitution $\theta$ such that $\theta(x_i) \in \llbracket \alpha_i \rrbracket_\rho$.
+    \item The term $M$ is interpreted via the function produced by $\llbracket \cdot \rrbracket$, respecting the types in the context and yielding a set-theoretic value in $\llbracket \alpha \rrbracket_\rho$.
+    \item The interpretation $\llbracket \Gamma \vdash M : \alpha \rrbracket(\theta)$ effectively maps each variable $x_i$ to its semantic value $\theta(x_i)$.
+\end{itemize}
+\end{frame}
+
+\begin{frame}
+\frametitle{Recursive Definition of Denotation for Terms*}
+
+The denotational semantics $\llbracket \Gamma \vdash M : \alpha \rrbracket (\theta)$ is defined recursively as follows:
+
+\begin{itemize}
+    \item $\llbracket \Gamma \vdash x : \alpha \rrbracket (\theta) = \theta(x)$
+    \item $\llbracket \Gamma \vdash \langle \rangle : 1 \rrbracket (\theta) = \star$
+    \item $\llbracket \Gamma \vdash c : \tau \rrbracket (\theta) = \text{const}(c)$, where $\text{const}(c)$ is the interpretation of $c$.
+    \item $\llbracket \Gamma \vdash f(M_1, \ldots, M_n) : \sigma \rrbracket (\theta) = \text{func}(f)(\llbracket M_1 \rrbracket(\theta), \ldots, \llbracket M_n \rrbracket(\theta))$, where $\text{func}(f)$ is the function interpretation of $f$.
+    \item $\llbracket \Gamma \vdash \lambda x : \alpha. M : \alpha \rightarrow \beta \rrbracket (\theta) = g$, where $g \in \llbracket \alpha \rrbracket_\rho \rightarrow \llbracket \beta \rrbracket_\rho$ is the function such that for all $v \in \llbracket \alpha \rrbracket_\rho$, $g(v) = \llbracket \Gamma, x:\alpha \vdash M : \beta \rrbracket (\theta[x \mapsto v])$.
+    \item $\llbracket \Gamma \vdash M \, N : \beta \rrbracket (\theta) = \llbracket M \rrbracket(\theta)(\llbracket N \rrbracket(\theta))$
+    \item $\llbracket \Gamma \vdash \langle M_1, M_2 \rangle : \alpha_1 \times \alpha_2 \rrbracket (\theta) = (\llbracket M_1 \rrbracket(\theta), \llbracket M_2 \rrbracket(\theta))$
+    \item $\llbracket \Gamma \vdash \pi_1(M) : \alpha_1 \rrbracket (\theta) = \pi_1(\llbracket M \rrbracket(\theta))$
+    \item $\llbracket \Gamma \vdash \pi_2(M) : \alpha_2 \rrbracket (\theta) = \pi_2(\llbracket M \rrbracket(\theta))$
+\end{itemize}
+
+Here, $\theta[x \mapsto v]$ denotes the substitution function $\theta$ updated to map $x$ to $v$.
+\end{frame}
+
+\begin{frame}
+\frametitle{Soundness of Denotational Semantics with respect to Equational Theory*}
+
+\textbf{Theorem: Soundness}
+
+Let $\Gamma \vdash M = N : \alpha$ be a valid equation in the equational theory. Then, for any interpretation function $\rho$ and for any substitution $\theta$ that respects the context $\Gamma$, the denotational semantics satisfies:
+
+\[
+\llbracket \Gamma \vdash M : \alpha \rrbracket (\theta) = \llbracket \Gamma \vdash N : \alpha \rrbracket (\theta)
+\]
+
+\medskip
+
+This theorem asserts that if two terms $M$ and $N$ are provably equal in the equational theory, they have the same denotation in every model, thereby establishing the consistency of the semantics with the equational reasoning.
+\end{frame}
+
 
 \begin{frame}
 \frametitle{References}
