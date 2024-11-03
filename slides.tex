@@ -1,0 +1,145 @@
+\documentclass[aspectratio=169]{beamer}
+
+\usepackage{amsmath,amssymb,bussproofs,proof,stmaryrd}
+
+\title{Introduction to Proving Stuff\textsuperscript{\texttrademark} with Logical Relations}
+\author{Jesse Sigal}
+\date{November 7, 2024}
+
+\begin{document}
+
+\begin{frame}
+\titlepage
+\end{frame}
+
+\begin{frame}
+\frametitle{Types}
+\[
+\alpha, \beta ::= \tau \mid \alpha_1 \times \alpha_2 \mid \alpha \rightarrow \beta
+\]
+
+Where:
+\begin{itemize}
+    \item $\tau$ is a ground type from a fixed set of symbols, e.g.\ $\{\text{Int}, \text{Bool}, \ldots\},$
+    \item $\alpha_1 \times \alpha_2$ is a product type,
+    \item $\alpha \rightarrow \beta$ is a function type.
+\end{itemize}
+\end{frame}
+
+\begin{frame}
+\frametitle{Signature}
+A signature $\Sigma = (\Sigma_{\text{const}}, \Sigma_{\text{func}})$ is composed of two sets, namely
+\begin{itemize}
+    \item $\Sigma_{\text{const}}$ whose elements are constant symbols $c : \tau$; and
+    \item $\Sigma_{\text{func}}$ whose elements are function symbols $f : (\tau_1, \ldots, \tau_n) \to \sigma$.
+\end{itemize}
+Everything is defined with respect to a signature $\Sigma$.
+
+\end{frame}
+
+\begin{frame}
+\frametitle{Syntax}
+
+\[
+M, N ::= x \mid c \mid f(M_1, \ldots, M_n) \mid \lambda x: \alpha. M \mid M \, N \mid \langle M_1, M_2 \rangle \mid \pi_1(M) \mid \pi_2(M)
+\]
+
+Where:
+\begin{itemize}
+    \item $x$ is a variable from a countably infinite set $\{x, y, z, \ldots \}$,
+    \item $c$ is a constant symbol in $\Sigma_{\text{const}}$,
+    \item $f$ is a function symbol in $\Sigma_{\text{func}}$,
+    \item $\lambda x: \alpha. M$ is lambda abstraction with $\alpha$ is a type,
+    \item $M\, N$ is application,
+    \item $\langle M_1, M_2 \rangle$ is a product,
+    \item $\pi_1(M)$ and $\pi_2(M)$ are projections.
+\end{itemize}
+\end{frame}
+
+\begin{frame}
+\frametitle{Free variables}
+The function $\text{FV}(M)$ is defined recursively as follows:
+\begin{itemize}
+    \item $\text{FV}(x) = \{x\}$
+    \item $\text{FV}(c) = \emptyset$
+    \item $\text{FV}(f(M_1, \ldots, M_n)) = \bigcup_{i=1}^{n} \text{FV}(M_i)$
+    \item $\text{FV}(\lambda x: \alpha. M) = \text{FV}(M) \setminus \{x\}$
+    \item $\text{FV}(M \, N) = \text{FV}(M) \cup \text{FV}(N)$
+    \item $\text{FV}(\langle M_1, M_2 \rangle) = \text{FV}(M_1) \cup \text{FV}(M_2)$
+    \item $\text{FV}(\pi_1(M)) = \text{FV}(M)$
+    \item $\text{FV}(\pi_2(M)) = \text{FV}(M)$
+\end{itemize}
+\end{frame}
+
+\begin{frame}
+\frametitle{Capture-avoiding substitution}
+
+Substitution of $N$ for $x$ in $M$ in a capture-avoiding way, denoted $M[x := N]$, is defined recursively as follows:
+
+\begin{itemize}
+    \item $x[x := N] = N$
+    \item $y[x := N] = y$, for $y \neq x$
+    \item $c[x := N] = c$
+    \item $f(M_1, \ldots, M_n)[x := N] = f(M_1[x := N], \ldots, M_n[x := N]))$
+    \item $(M \, P)[x := N] = (M[x := N]) \, (P[x := N])$
+    \item $\langle M_1 , M_2 \rangle[x := N] = \langle M_1[x := N], M_2[x := N] \rangle$
+    \item $\pi_1(M)[x := N] = \pi_1(M[x := N])$
+    \item $\pi_2(M)[x := N] = \pi_2(M[x := N])$
+    \item $(\lambda y : \alpha. M)[x := N] =
+    \begin{cases}
+    \lambda y : \alpha. M[x := N] & \text{if } y \neq x \text{ and } y \notin \text{FV}(N) \\
+    \lambda z : \alpha. M[y := z][x := N] & \text{if } y = x \text{ or } y \in \text{FV}(N)
+    \end{cases}$
+\end{itemize}
+\end{frame}
+
+\begin{frame}
+\frametitle{Typing Judgments}
+
+\[
+\infer{\Gamma \vdash x : \alpha}{(x : \alpha) \in \Gamma}
+\qquad\infer{\Gamma \vdash c : \tau}{c : \tau \in \Sigma_{\text{const}}}
+\]
+
+\[
+\infer{\Gamma \vdash f(M_1, \ldots, M_n) : \sigma}{\Gamma \vdash M_1 : \tau_1 \quad \ldots \quad \Gamma \vdash M_n : \tau_n \quad f : (\tau_1, \ldots, \tau_n) \rightarrow \sigma \in \Sigma_{\text{func}}}
+\]
+
+\[
+\infer{\Gamma \vdash \lambda x : \alpha. M : \alpha \rightarrow \beta}{\Gamma, x : \alpha \vdash M : \beta}
+\qquad\infer{\Gamma \vdash M \, N : \beta}{\Gamma \vdash M : \alpha \rightarrow \beta \quad \Gamma \vdash N : \alpha}
+\]
+
+\[
+\infer{\Gamma \vdash \langle M_1, M_2 \rangle : \alpha_1 \times \alpha_2}{\Gamma \vdash M_1 : \alpha \quad \Gamma \vdash M_2 : \alpha_2}
+\qquad\infer{\Gamma \vdash \pi_1(M) : \alpha_1}{\Gamma \vdash M : \alpha_1 \times \alpha_2}
+\qquad\infer{\Gamma \vdash \pi_2(M) : \alpha_2}{\Gamma \vdash M : \alpha_1 \times \alpha_2}
+\]
+\end{frame}
+
+\begin{frame}
+\frametitle{Denotational Semantics}
+
+\textbf{Interpretation of Types}:
+
+\begin{itemize}
+    \item $\llbracket \tau \rrbracket = G_\tau$
+    \item $\llbracket \alpha_1 \times \alpha_2 \rrbracket = \llbracket \alpha_1 \rrbracket \times \llbracket \alpha_2 \rrbracket$
+    \item $\llbracket \alpha \rightarrow \beta \rrbracket = \llbracket \alpha \rrbracket \rightarrow \llbracket \beta \rrbracket$
+\end{itemize}
+
+\textbf{Interpretation of Terms} (given environment $\rho$):
+\begin{itemize}
+    \item $\llbracket x \rrbracket_\rho = \rho(x)$
+    \item $\llbracket c \rrbracket_\rho = c$
+    \item $\llbracket f(M_1, \ldots, M_n) \rrbracket_\rho = f(\llbracket M_1 \rrbracket_\rho, \ldots, \llbracket M_n \rrbracket_\rho)$
+    \item $\llbracket \lambda x : \alpha. M \rrbracket_\rho = \lambda a \in \llbracket \alpha \rrbracket. \llbracket M \rrbracket_{\rho[x := a]}$
+    \item $\llbracket M \, N \rrbracket_\rho = \llbracket M \rrbracket_\rho (\llbracket N \rrbracket_\rho)$
+    \item $\llbracket \langle M_1, M_2 \rangle \rrbracket_\rho = (\llbracket M_1 \rrbracket_\rho, \llbracket M_2 \rrbracket_\rho)$
+    \item $\llbracket \pi_1(M) \rrbracket_\rho = \pi_1(\llbracket M \rrbracket_\rho)$
+    \item $\llbracket \pi_2(M) \rrbracket_\rho = \pi_2(\llbracket M \rrbracket_\rho)$
+\end{itemize}
+
+\end{frame}
+
+\end{document}
