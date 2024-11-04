@@ -1,10 +1,21 @@
 \documentclass[aspectratio=169]{beamer}
 
+\usepackage{fontspec}
+\usepackage[math-style=ISO]{unicode-math}
+
+\setmathfont[
+  Extension=.otf,
+]{STIXTwoMath-Regular}
+
 \usepackage[style=authoryear]{biblatex}
 \usepackage{amsmath}
 \usepackage{amssymb}
 \usepackage{proof}
 \usepackage{stmaryrd}
+
+\setbeamertemplate{itemize item}[circle]
+\setbeamertemplate{itemize subitem}[circle]
+\setbeamertemplate{itemize subsubitem}[circle]
 
 \title{Introduction to Proving Stuff\textsuperscript{\texttrademark} with Logical Relations}
 \author{Jesse Sigal}
@@ -61,7 +72,12 @@
     \pause
     \item Logical relations is a proof method that lets us easily prove the above, as well as many more complicated and interesting theorems.
     \pause
-    \item For example, we can prove that every simply typed lambda calculus term terminates!
+    \item For example:
+    \begin{itemize}
+        \item Termination
+        \item Type safety
+        \item Program equivalence (optimizations, representation independence)
+    \end{itemize}
 \end{itemize}
 \end{frame}
 
@@ -192,7 +208,7 @@ Here are two examples:
 \]
 \pause
 \[
-\infer{\Gamma \vdash f(M_1, \ldots, M_n) : \tau}{\Gamma \vdash M_1 : \tau_1 & \ldots & \Gamma \vdash M_n : \tau_n & f : (\tau_1, \ldots, \tau_n) \rightarrow \tau \in \Sigma_{\text{func}}}
+\infer{\Gamma \vdash f(M_1, \ldots, M_n) : \tau}{\Gamma \vdash M_1 : \tau_1 & \cdots & \Gamma \vdash M_n : \tau_n & f : (\tau_1, \ldots, \tau_n) \rightarrow \tau \in \Sigma_{\text{func}}}
 \]
 \pause
 \[
@@ -202,7 +218,7 @@ Here are two examples:
 \]
 \pause
 \[
-\infer{\Gamma \vdash \langle M_1, M_2 \rangle : \alpha_1 \times \alpha_2}{\Gamma \vdash M_1 : \alpha & \Gamma \vdash M_2 : \alpha_2}
+\infer{\Gamma \vdash \langle M_1, M_2 \rangle : \alpha_1 \times \alpha_2}{\Gamma \vdash M_1 : \alpha_1 & \Gamma \vdash M_2 : \alpha_2}
 \qquad
 \infer{\Gamma \vdash \pi_1(M) : \alpha_1}{\Gamma \vdash M : \alpha_1 \times \alpha_2}
 \qquad
@@ -345,10 +361,10 @@ Fix a fixed $\rho$ and $\sigma$, we can define the meaning of a lambda term.
 In a context $\Gamma = x_1 : \alpha_1, \ldots, x_n : \alpha_n$, the denotational semantics of a term $M$ is a function:
 
 \[
-\llbracket \Gamma \vdash M : \alpha \rrbracket_{\rho, \sigma} : \llbracket \alpha_1 \rrbracket_\rho \times \cdots \times \llbracket \alpha_n \rrbracket_\rho \to \llbracket \alpha \rrbracket_\rho
+\llbracket \Gamma \vdash M : \alpha \rrbracket_{\rho, \sigma} : \llbracket \alpha_1 \times \cdots \times \alpha_n \rrbracket_\rho \to \llbracket \alpha \rrbracket_\rho
 \]
 
-For a $\Gamma$ as above, we will write $\gamma$ for an element of $\llbracket \alpha_1 \rrbracket_\rho \times \cdots \times \llbracket \alpha_n \rrbracket_\rho$ and write $\gamma(x_i)$ for the $i^{\text{th}}$ component of the tuple.
+For a $\Gamma$ as above, we will write $\gamma$ for an element of $\llbracket \alpha_1 \times \cdots \times \alpha_n \rrbracket_\rho$ and write $\gamma(x_i)$ for the $i^{\text{th}}$ component of the tuple.
 \end{frame}
 
 \begin{frame}
@@ -376,20 +392,104 @@ Here, $\gamma[x \mapsto v]$ denotes extension of $\gamma$ mapping $x$ to $v$.
 \begin{frame}
 \frametitle{Soundness}
 
-\textbf{Theorem:}
+\begin{theorem}
+    Let $\Omega$ be a set of axioms in a signature $\Sigma$.
+    Let $\rho$ and $\sigma$ be assignments such that, for all $\left(\Gamma \vdash M : \alpha, \Gamma \vdash N : \alpha\right) \in \Omega$, we have $\llbracket \Gamma \vdash M : \alpha \rrbracket_{\rho, \sigma} = \llbracket \Gamma \vdash N : \alpha \rrbracket_{\rho, \sigma}$.
+    Then, for all valid equations $\Gamma \vdash M = N : \alpha$ we have
+    
+    \[
+        \llbracket \Gamma \vdash M : \alpha \rrbracket_{\rho, \sigma} = \llbracket \Gamma \vdash N : \alpha \rrbracket_{\rho, \sigma}
+    \]
+    \begin{proof}
+        By induction on the proof of $\Gamma \vdash M = N : \alpha$.
+    \end{proof}
+\end{theorem}
 
-Let $\Omega$ be a set of axioms in a signature $\Sigma$.
-Let $\rho$ and $\sigma$ be assignments such that, for all $\left(\Gamma \vdash M : \alpha, \Gamma \vdash N : \alpha\right) \in \Omega$, we have $\llbracket \Gamma \vdash M : \alpha \rrbracket_{\rho, \sigma} = \llbracket \Gamma \vdash N : \alpha \rrbracket_{\rho, \sigma}$.
-Then, for all valid equations $\Gamma \vdash M = N : \alpha$ we have
-
-\[
-\llbracket \Gamma \vdash M : \alpha \rrbracket_{\rho, \sigma} = \llbracket \Gamma \vdash N : \alpha \rrbracket_{\rho, \sigma}
-\]
+\medskip
 
 Thus, if we respect the axioms, then equivalent terms have equal denotational semantics. This is the minimum we expect from denotational semantics.
 
 \end{frame}
 
+\begin{frame}
+\frametitle{Logical Relations Semantics for Types}
+
+We can view logical relations as a new type of denotational semantics.
+We begin with the types.
+For each type $\alpha$, we're going to define \emph{two sets}, $P$ and $A$, such that $P \subseteq A$
+
+\pause
+\medskip
+
+Let $\rho$ be a function that assigns a pair of sets $\left(\rho_{\mathcal{P}}(\tau), \rho_{\mathcal{A}}(\tau)\right)$ to each ground type $\tau$ such that $\rho_{\mathcal{P}}(\tau) \subseteq \rho_{\mathcal{A}}(\tau)$, e.g., $\rho(\text{Int}) = \left(\{2n : n \in \mathbb{Z}\}, \mathbb{Z}\right)$.
+
+\pause
+\medskip
+
+Then to type $\alpha$, we are going to assign a pair of sets $\lBrace \alpha \rBrace_{\rho} = \left(\mathcal{P}\lBrace \alpha \rBrace_{\rho}, \mathcal{A}\lBrace \alpha \rBrace_{\rho}\right)$ as follows:
+
+\begin{itemize}
+    \item $\lBrace \tau \rBrace_{\rho} = \left(\rho_{\mathcal{P}}(\tau), \rho_{\mathcal{A}}(\tau)\right)$
+    \item $\lBrace 1 \rBrace_{\rho} = \left(\{\star\}, \{\star\}\right)$
+    \item $\lBrace \alpha_1 \times \alpha_2 \rBrace_{\rho} = \left(\mathcal{P}\lBrace \alpha_1 \rBrace_{\rho} \times \mathcal{P}\lBrace \alpha_2 \rBrace_{\rho}, \mathcal{A}\lBrace \alpha_1 \rBrace_{\rho} \times \mathcal{A}\lBrace \alpha_2 \rBrace_{\rho}\right)$
+    \item $\lBrace \alpha \rightarrow \beta \rBrace_{\rho} = \left(\left\{ f : \forall x \in \mathcal{P}\lBrace \alpha \rBrace_{\rho}. f(x) \in \mathcal{P}\lBrace \beta \rBrace_{\rho} \right\},\, \mathcal{A}\lBrace \alpha \rBrace_{\rho} \rightarrow \mathcal{A}\lBrace \beta \rBrace_{\rho}\right)$
+\end{itemize}
+
+Note that $\mathcal{A}\lBrace \alpha \rBrace_{\rho} = \llbracket\alpha \rrbracket_{\rho_{\mathcal{A}}}$ 
+
+\end{frame}
+
+\begin{frame}
+\frametitle{Logical Relations Semantics for Signatures}
+
+For a fixed $\rho$ assigning ground types to sets, we can give an interpretation $\sigma$  to the constants and functions of a signature $\Sigma = (\Sigma_{\text{const}}, \Sigma_{\text{func}})$:
+\begin{itemize}
+    \item for each $c : \tau \in \Sigma_{\text{const}}$, an element $\sigma(c) \in \rho_{\mathcal{P}}(\tau)$; and
+    \item for each $f : (\tau_1, \ldots, \tau_n) \to \tau \in \Sigma_{\text{func}}$, a function $\sigma(f) \in \rho_{\mathcal{A}}(\tau_1) \times \cdots \times \rho_{\mathcal{A}}(\tau_n) \to \rho_{\mathcal{A}}(\tau)$ such that if $(x_1, \ldots, x_n) \in \rho_{\mathcal{P}}(\tau_1) \times \cdots \times \rho_{\mathcal{P}}(\tau_n)$ then $\sigma(f)(x_1, \ldots, x_n) \in \rho_{\mathcal{P}}(\tau)$.
+\end{itemize}
+Note that $\sigma(c) \in \mathcal{P}\lBrace \tau \rBrace_{\rho}$ and $\sigma(f) \in \mathcal{P}\lBrace \tau_1 \times \cdots \times \tau_n \rightarrow \tau \rBrace_{\rho}$, as well as that $\sigma(c) \in \llbracket \tau \rrbracket_{\rho_{\mathcal{A}}}$ and $\sigma(f) \in \llbracket \tau_1 \times \cdots \times \tau_n \rightarrow \tau \rrbracket_{\rho_{\mathcal{A}}}$.
+\end{frame}
+
+\begin{frame}
+\frametitle{Logical Relations Semantics for Terms in Context}
+
+Fix a fixed $\rho$ and $\sigma$, we can again define the meaning of a lambda term.
+In a context $\Gamma = x_1 : \alpha_1, \ldots, x_n : \alpha_n$, the logical relations semantics of a term $M$ is a function:
+
+\[
+\lBrace \Gamma \vdash M : \alpha \rBrace_{\rho, \sigma} : \mathcal{A}\lBrace \alpha_1 \times \cdots \times \alpha_n \rBrace_\rho \to \mathcal{A}\lBrace \alpha \rBrace_\rho
+\]
+
+such that for all $\gamma \in \mathcal{P}\lBrace \alpha_1 \times \cdots \times \alpha_n \rBrace_\rho$ we have $\lBrace \Gamma \vdash M : \alpha \rBrace_{\rho, \sigma}(\gamma) \in \mathcal{P}\lBrace \alpha \rBrace_\rho$.
+
+\end{frame}
+
+\begin{frame}
+\frametitle{Fundamental Theorem of Logical Relations}
+
+Recall that $\mathcal{A}\lBrace \alpha \rBrace_{\rho} = \llbracket\alpha \rrbracket_{\rho_{\mathcal{A}}}$.
+Thus, we can define
+
+\[
+\lBrace \Gamma \vdash M : \alpha \rBrace_{\rho, \sigma} : \mathcal{A}\lBrace \alpha_1 \times \cdots \times \alpha_n \rBrace_\rho \to \mathcal{A}\lBrace \alpha \rBrace_\rho
+\]
+
+as $\lBrace \Gamma \vdash M : \alpha \rBrace_{\rho, \sigma} := \llbracket \Gamma \vdash M : \alpha \rrbracket_{\rho_{\mathcal{A}}, \sigma}$ if for all $\gamma \in \mathcal{P}\lBrace \alpha_1 \times \cdots \times \alpha_n \rBrace_\rho$ we have $\llbracket \Gamma \vdash M : \alpha \rrbracket_{\rho_{\mathcal{A}}, \sigma}(\gamma) \in \mathcal{P}\lBrace \alpha \rBrace_\rho$.
+
+\medskip
+
+\begin{theorem}
+    For all $\gamma \in \mathcal{P}\lBrace \alpha_1 \times \cdots \times \alpha_n \rBrace_\rho$ we have $\llbracket \Gamma \vdash M : \alpha \rrbracket_{\rho_{\mathcal{A}}, \sigma}(\gamma) \in \mathcal{P}\lBrace \alpha \rBrace_\rho$.
+    \begin{proof}
+        Induction on the structure of $M$.
+    \end{proof}
+\end{theorem}
+
+\medskip
+
+This is known as the \emph{Fundamental Theorem of Logical Relations}, or the \emph{Basic Lemma of Logical Relations}.
+Note that we had to choose the interpretation $\sigma$ of our constants and built-in functions to respect $\rho_{\mathcal{P}}$.
+\end{frame}
 
 \begin{frame}
 \frametitle{References}
