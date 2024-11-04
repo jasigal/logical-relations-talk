@@ -80,7 +80,7 @@ Where:
 A signature $\Sigma = (\Sigma_{\text{const}}, \Sigma_{\text{func}})$ is composed of two sets, namely
 \begin{itemize}
     \item $\Sigma_{\text{const}}$ whose elements are constant symbols $c : \tau$; and
-    \item $\Sigma_{\text{func}}$ whose elements are function symbols $f : (\tau_1, \ldots, \tau_n) \to \sigma$.
+    \item $\Sigma_{\text{func}}$ whose elements are function symbols $f : (\tau_1, \ldots, \tau_n) \to \tau$.
 \end{itemize}
 Everything is defined with respect to a signature $\Sigma$.
 
@@ -187,7 +187,7 @@ Here are two examples:
 \]
 \pause
 \[
-\infer{\Gamma \vdash f(M_1, \ldots, M_n) : \sigma}{\Gamma \vdash M_1 : \tau_1 & \ldots & \Gamma \vdash M_n : \tau_n & f : (\tau_1, \ldots, \tau_n) \rightarrow \sigma \in \Sigma_{\text{func}}}
+\infer{\Gamma \vdash f(M_1, \ldots, M_n) : \tau}{\Gamma \vdash M_1 : \tau_1 & \ldots & \Gamma \vdash M_n : \tau_n & f : (\tau_1, \ldots, \tau_n) \rightarrow \tau \in \Sigma_{\text{func}}}
 \]
 \pause
 \[
@@ -218,6 +218,7 @@ The judgments means that in the type context $\Gamma$, the terms $M$ and $N$ are
 \medskip
 
 Equations-in-contexts allow us to perform equational reasoning while respecting the types assigned to the variables involved.
+
 \end{frame}
 
 \begin{frame}
@@ -286,104 +287,101 @@ Equations-in-contexts allow us to perform equational reasoning while respecting 
 \end{frame}
 
 \begin{frame}
-\frametitle{Denotational Semantics*}
-
-\textbf{Interpretation of Types}:
-
-\begin{itemize}
-    \item $\llbracket \tau \rrbracket = G_\tau$
-    \item $\llbracket 1 \rrbracket = \{\star\}$
-    \item $\llbracket \alpha_1 \times \alpha_2 \rrbracket = \llbracket \alpha_1 \rrbracket \times \llbracket \alpha_2 \rrbracket$
-    \item $\llbracket \alpha \rightarrow \beta \rrbracket = \llbracket \alpha \rrbracket \rightarrow \llbracket \beta \rrbracket$
-\end{itemize}
-
-\textbf{Interpretation of Terms} (given environment $\rho$):
-\begin{itemize}
-    \item $\llbracket x \rrbracket_\rho = \rho(x)$
-    \item $\llbracket \langle \rangle \rrbracket_\rho = \star$
-    \item $\llbracket c \rrbracket_\rho = c$
-    \item $\llbracket f(M_1, \ldots, M_n) \rrbracket_\rho = f(\llbracket M_1 \rrbracket_\rho, \ldots, \llbracket M_n \rrbracket_\rho)$
-    \item $\llbracket \lambda x : \alpha. M \rrbracket_\rho = \lambda a \in \llbracket \alpha \rrbracket. \llbracket M \rrbracket_{\rho[x := a]}$
-    \item $\llbracket M \, N \rrbracket_\rho = \llbracket M \rrbracket_\rho (\llbracket N \rrbracket_\rho)$
-    \item $\llbracket \langle M_1, M_2 \rangle \rrbracket_\rho = (\llbracket M_1 \rrbracket_\rho, \llbracket M_2 \rrbracket_\rho)$
-    \item $\llbracket \pi_1(M) \rrbracket_\rho = \pi_1(\llbracket M \rrbracket_\rho)$
-    \item $\llbracket \pi_2(M) \rrbracket_\rho = \pi_2(\llbracket M \rrbracket_\rho)$
-\end{itemize}
+\frametitle{Axioms}
+We also want axioms in order to reason about elements of our signature $\Sigma$.
+An axiom is a pair of terms $\left(\Gamma \vdash M : \alpha, \Gamma \vdash N : \alpha\right)$ of terms of the same type in the same context.
+For a set of axioms $\Omega$, we have the rule
+\[
+\infer[\text{(Axiom)}]{\Gamma \vdash M = N : \alpha}{\left(\Gamma \vdash M : \alpha, \Gamma \vdash N : \alpha\right) \in \Omega}
+\]
+Note that it is possible to prove false if you choose your axioms wrong!
 \end{frame}
 
 \begin{frame}
-\frametitle{Set Theoretic Denotational Semantics for Types*}
+\frametitle{Set-Theoretic Denotational Semantics for Types*}
 
-\[
-\llbracket \alpha \rrbracket_\rho =
-\begin{cases}
-\rho(\tau) & \text{if } \alpha = \tau \\
-\{\star\} & \text{if } \alpha = 1 \\
-\llbracket \alpha_1 \rrbracket_\rho \times \llbracket \alpha_2 \rrbracket_\rho & \text{if } \alpha = \alpha_1 \times \alpha_2 \\
-\llbracket \alpha \rrbracket_\rho \rightarrow \llbracket \beta \rrbracket_\rho & \text{if } \alpha = \alpha \rightarrow \beta
-\end{cases}
-\]
+Let $\rho$ be a function that assigns a set $\rho(\tau)$ to each ground type $\tau$, e.g., $\rho(\text{Int}) = \mathbb{Z}$, $\rho(\text{Bool}) = \{ \text{true}, \text{false} \}$.
+
+\pause
+\medskip
+
+Then to type $\alpha$, we are going to assign a set $\llbracket \alpha \rrbracket_{\rho}$ as follows:
+
+\begin{itemize}
+    \item $\llbracket \tau \rrbracket_{\rho} = \rho(\tau)$
+    \item $\llbracket 1 \rrbracket_{\rho} = \{\star\}$
+    \item $\llbracket \alpha_1 \times \alpha_2 \rrbracket_{\rho} = \llbracket \alpha_1 \rrbracket_{\rho} \times \llbracket \alpha_2 \rrbracket_{\rho}$
+    \item $\llbracket \alpha \rightarrow \beta \rrbracket_{\rho} = \llbracket \alpha \rrbracket_{\rho} \rightarrow \llbracket \beta \rrbracket_{\rho}$
+\end{itemize}
 
 Where:
 \begin{itemize}
-    \item $\rho$ is an interpretation function that assigns a set $\rho(\tau)$ to each ground type $\tau$, e.g., $\rho(\text{Int}) = \mathbb{Z}$, $\rho(\text{Bool}) = \{ \text{true}, \text{false} \}$.
-    \item $\{\star\}$ is the singleton set representing the unit type.
-    \item $\times$ denotes the Cartesian product of sets.
-    \item $\rightarrow$ denotes the set of all functions from one set to another.
+    \item $\{\star\}$ is a singleton set of exactly one element;
+    \item $\times$ denotes the Cartesian product of sets; and
+    \item $\rightarrow$ denotes the set of functions.
 \end{itemize}
 \end{frame}
 
 \begin{frame}
-\frametitle{Set Theoretic Denotational Semantics for Terms in Context*}
+\frametitle{Set-Theoretic Denotational Semantics for Signatures}
 
+For a fixed $\rho$ assigning ground types to sets, we can give an interpretation $\sigma$  to the constants and functions of a signature $\Sigma = (\Sigma_{\text{const}}, \Sigma_{\text{func}})$:
+\begin{itemize}
+    \item for each $c : \tau \in \Sigma_{\text{const}}$, an element $\sigma(c) \in \rho(\tau)$; and
+    \item for each $f : (\tau_1, \ldots, \tau_n) \to \tau \in \Sigma_{\text{func}}$, a function $\sigma(f) \in \rho(\tau_1) \times \!\cdots\! \times \rho(\tau_n) \to \rho(\tau)$.
+\end{itemize}
+Note that $\sigma(c) \in \llbracket \tau \rrbracket_{\rho}$ and $\sigma(f) \in \llbracket \tau_1 \times \cdots \times \tau_n \rightarrow \tau \rrbracket_{\rho}$.
+\end{frame}
+
+\begin{frame}
+\frametitle{Set-Theoretic Denotational Semantics for Terms in Context*}
+
+Fix a fixed $\rho$ and $\sigma$, we can define the meaning of a lambda term.
 In a context $\Gamma = x_1 : \alpha_1, \ldots, x_n : \alpha_n$, the denotational semantics of a term $M$ is a function:
 
 \[
-\llbracket \Gamma \vdash M : \alpha \rrbracket : \llbracket \alpha_1 \rrbracket_\rho \times \cdots \times \llbracket \alpha_n \rrbracket_\rho \to \llbracket \alpha \rrbracket_\rho
+\llbracket \Gamma \vdash M : \alpha \rrbracket_{\rho, \sigma} : \llbracket \alpha_1 \rrbracket_\rho \times \cdots \times \llbracket \alpha_n \rrbracket_\rho \to \llbracket \alpha \rrbracket_\rho
 \]
 
-Where:
-\begin{itemize}
-    \item The interpretation of variables in context $\Gamma$ is given by a substitution $\theta$ such that $\theta(x_i) \in \llbracket \alpha_i \rrbracket_\rho$.
-    \item The term $M$ is interpreted via the function produced by $\llbracket \cdot \rrbracket$, respecting the types in the context and yielding a set-theoretic value in $\llbracket \alpha \rrbracket_\rho$.
-    \item The interpretation $\llbracket \Gamma \vdash M : \alpha \rrbracket(\theta)$ effectively maps each variable $x_i$ to its semantic value $\theta(x_i)$.
-\end{itemize}
+For a $\Gamma$ as above, we will write $\gamma$ for an element of $\llbracket \alpha_1 \rrbracket_\rho \times \cdots \times \llbracket \alpha_n \rrbracket_\rho$ and write $\gamma(x_i)$ for the $i^{\text{th}}$ component of the tuple.
 \end{frame}
 
 \begin{frame}
 \frametitle{Recursive Definition of Denotation for Terms*}
 
-The denotational semantics $\llbracket \Gamma \vdash M : \alpha \rrbracket (\theta)$ is defined recursively as follows:
+The denotational semantics $\llbracket \Gamma \vdash M : \alpha \rrbracket_{\rho,\sigma} (\gamma)$ is defined recursively as follows:
 
 \begin{itemize}
-    \item $\llbracket \Gamma \vdash x : \alpha \rrbracket (\theta) = \theta(x)$
-    \item $\llbracket \Gamma \vdash \langle \rangle : 1 \rrbracket (\theta) = \star$
-    \item $\llbracket \Gamma \vdash c : \tau \rrbracket (\theta) = \text{const}(c)$, where $\text{const}(c)$ is the interpretation of $c$.
-    \item $\llbracket \Gamma \vdash f(M_1, \ldots, M_n) : \sigma \rrbracket (\theta) = \text{func}(f)(\llbracket M_1 \rrbracket(\theta), \ldots, \llbracket M_n \rrbracket(\theta))$, where $\text{func}(f)$ is the function interpretation of $f$.
-    \item $\llbracket \Gamma \vdash \lambda x : \alpha. M : \alpha \rightarrow \beta \rrbracket (\theta) = g$, where $g \in \llbracket \alpha \rrbracket_\rho \rightarrow \llbracket \beta \rrbracket_\rho$ is the function such that for all $v \in \llbracket \alpha \rrbracket_\rho$, $g(v) = \llbracket \Gamma, x:\alpha \vdash M : \beta \rrbracket (\theta[x \mapsto v])$.
-    \item $\llbracket \Gamma \vdash M \, N : \beta \rrbracket (\theta) = \llbracket M \rrbracket(\theta)(\llbracket N \rrbracket(\theta))$
-    \item $\llbracket \Gamma \vdash \langle M_1, M_2 \rangle : \alpha_1 \times \alpha_2 \rrbracket (\theta) = (\llbracket M_1 \rrbracket(\theta), \llbracket M_2 \rrbracket(\theta))$
-    \item $\llbracket \Gamma \vdash \pi_1(M) : \alpha_1 \rrbracket (\theta) = \pi_1(\llbracket M \rrbracket(\theta))$
-    \item $\llbracket \Gamma \vdash \pi_2(M) : \alpha_2 \rrbracket (\theta) = \pi_2(\llbracket M \rrbracket(\theta))$
+    \item $\llbracket \Gamma \vdash x : \alpha \rrbracket_{\rho,\sigma} (\gamma) = \gamma(x)$
+    \item $\llbracket \Gamma \vdash \langle \rangle : 1 \rrbracket_{\rho,\sigma} (\gamma) = \star$
+    \item $\llbracket \Gamma \vdash c : \tau \rrbracket_{\rho,\sigma} (\gamma) = \sigma(c)$
+    \item $\llbracket \Gamma \vdash f(M_1, \ldots, M_n) : \sigma \rrbracket_{\rho,\sigma} (\gamma) = \sigma(f)$
+    \pause
+    \item $\llbracket \Gamma \vdash \lambda x : \alpha. M : \alpha \rightarrow \beta \rrbracket_{\rho,\sigma} (\gamma) = \lambda x. \llbracket \Gamma, x:\alpha \vdash M : \beta \rrbracket_{\rho,\sigma} (\gamma[x \mapsto v])$
+    \pause
+    \item $\llbracket \Gamma \vdash M \, N : \beta \rrbracket_{\rho,\sigma} (\gamma) = \llbracket M \rrbracket_{\rho,\sigma}(\gamma)(\llbracket N \rrbracket_{\rho,\sigma}(\gamma))$
+    \item $\llbracket \Gamma \vdash \langle M_1, M_2 \rangle : \alpha_1 \times \alpha_2 \rrbracket_{\rho,\sigma} (\gamma) = (\llbracket M_1 \rrbracket_{\rho,\sigma}(\gamma), \llbracket M_2 \rrbracket_{\rho,\sigma}(\gamma))$
+    \item $\llbracket \Gamma \vdash \pi_1(M) : \alpha_1 \rrbracket_{\rho,\sigma} (\gamma) = \pi_1(\llbracket M \rrbracket_{\rho,\sigma}(\gamma))$
+    \item $\llbracket \Gamma \vdash \pi_2(M) : \alpha_2 \rrbracket_{\rho,\sigma} (\gamma) = \pi_2(\llbracket M \rrbracket_{\rho,\sigma}(\gamma))$
 \end{itemize}
 
-Here, $\theta[x \mapsto v]$ denotes the substitution function $\theta$ updated to map $x$ to $v$.
+Here, $\gamma[x \mapsto v]$ denotes extension of $\gamma$ mapping $x$ to $v$.
 \end{frame}
 
 \begin{frame}
-\frametitle{Soundness of Denotational Semantics with respect to Equational Theory*}
+\frametitle{Soundness}
 
-\textbf{Theorem: Soundness}
+\textbf{Theorem:}
 
-Let $\Gamma \vdash M = N : \alpha$ be a valid equation in the equational theory. Then, for any interpretation function $\rho$ and for any substitution $\theta$ that respects the context $\Gamma$, the denotational semantics satisfies:
+Let $\Omega$ be a set of axioms in a signature $\Sigma$.
+Let $\rho$ and $\sigma$ be assignments such that, for all $\left(\Gamma \vdash M : \alpha, \Gamma \vdash N : \alpha\right) \in \Omega$, we have $\llbracket \Gamma \vdash M : \alpha \rrbracket_{\rho, \sigma} = \llbracket \Gamma \vdash N : \alpha \rrbracket_{\rho, \sigma}$.
+Then, for all valid equations $\Gamma \vdash M = N : \alpha$ we have
 
 \[
-\llbracket \Gamma \vdash M : \alpha \rrbracket (\theta) = \llbracket \Gamma \vdash N : \alpha \rrbracket (\theta)
+\llbracket \Gamma \vdash M : \alpha \rrbracket_{\rho, \sigma} = \llbracket \Gamma \vdash N : \alpha \rrbracket_{\rho, \sigma}
 \]
 
-\medskip
-
-This theorem asserts that if two terms $M$ and $N$ are provably equal in the equational theory, they have the same denotation in every model, thereby establishing the consistency of the semantics with the equational reasoning.
+Thus, if we respect the axioms, then equivalent terms have equal denotational semantics.
 \end{frame}
 
 
