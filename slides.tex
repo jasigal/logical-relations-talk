@@ -44,7 +44,7 @@
     \item Lambda calculus (review?)
     \begin{itemize}
         \item Types
-        \item Signature
+        \item Signatures
         \item Syntax
         \item Free variables
         \item Substitution
@@ -55,6 +55,13 @@
         \item Soundness
     \end{itemize}
     \item Logical relations
+    \begin{itemize}
+        \item Types
+        \item Signatures
+        \item Terms
+        \item Fundamental theorem
+        \item Application
+    \end{itemize}
 \end{itemize}
 \end{frame}
 
@@ -66,9 +73,8 @@
     \pause
     \item But what if we want to prove something about \emph{all} programs in a language?
     \pause
-    \item For example, if we have a language with an integer type, addition, and multiplication.
-    \pause
-    \item How could we prove that if we only ever input even numbers that we always get even numbers out?
+    \item Suppose we have a language with an integer type, addition, and multiplication.
+    How could we prove that if we only ever input even numbers that we always get even numbers out?
     \pause
     \item Logical relations is a proof method that lets us easily prove the above, as well as many more complicated and interesting theorems.
     \pause
@@ -97,7 +103,7 @@ Where:
 \end{frame}
 
 \begin{frame}
-\frametitle{Signature}
+\frametitle{Signatures}
 A signature $\Sigma = (\Sigma_{\text{const}}, \Sigma_{\text{func}})$ is composed of two sets, namely
 \begin{itemize}
     \item $\Sigma_{\text{const}}$ whose elements are constant symbols $c : \tau$; and
@@ -108,7 +114,7 @@ Everything is defined with respect to a signature $\Sigma$.
 \medskip
 
 For example, assume that we have $\text{Int}$ as ground type.
-Then we could defined $\Sigma = \left(\{\underline{i} : i \in \mathbb{Z}\}, \{+, \times\}\right)$ 
+Then we could defined $\Sigma = \left(\left\{\underline{n} : n \in \mathbb{Z},\right\}, \left\{\underline{+}, \underline{\times}\right\}\right)$. 
 
 \end{frame}
 
@@ -133,7 +139,7 @@ Where:
 \end{frame}
 
 \begin{frame}
-\frametitle{Free variables*}
+\frametitle{Free Variables*}
 The function $\text{FV}(M)$ is defined recursively as follows:
 \begin{itemize}
     \item $\text{FV}(x) = \{x\}$
@@ -155,7 +161,7 @@ For example, $\text{FV}(\lambda (x: \alpha). y \, x) = \{y\}$.
 \end{frame}
 
 \begin{frame}
-\frametitle{Capture-avoiding substitution*}
+\frametitle{Capture-avoiding Substitution*}
 
 Substitution of $N$ for $x$ in $M$ in a capture-avoiding way, denoted $M[x := N]$, is defined recursively as follows:
 
@@ -176,7 +182,7 @@ Substitution of $N$ for $x$ in $M$ in a capture-avoiding way, denoted $M[x := N]
 \end{frame}
 
 \begin{frame}
-\frametitle{Capture-avoiding substitution (continued)*}
+\frametitle{Capture-avoiding Substitution (continued)*}
 
 Most importantly, we have the rule for abstraction:
 
@@ -416,12 +422,13 @@ Thus, if we respect the axioms, then equivalent terms have equal denotational se
 
 We can view logical relations as a new type of denotational semantics.
 We begin with the types.
-For each type $\alpha$, we're going to define \emph{two sets}, $P$ and $A$, such that $P \subseteq A$
+For each type $\alpha$, we're going to define \emph{two sets}, $P$ and $A$, such that $P \subseteq A$.
+The set $P$ is our \emph{predicate}.
 
 \pause
 \medskip
 
-Let $\rho$ be a function that assigns a pair of sets $\left(\rho_{\mathcal{P}}(\tau), \rho_{\mathcal{A}}(\tau)\right)$ to each ground type $\tau$ such that $\rho_{\mathcal{P}}(\tau) \subseteq \rho_{\mathcal{A}}(\tau)$, e.g., $\rho(\text{Int}) = \left(\{2n : n \in \mathbb{Z}\}, \mathbb{Z}\right)$.
+Let $\rho$ be a function that assigns a pair of sets $\left(\rho_{\mathcal{P}}(\tau), \rho_{\mathcal{A}}(\tau)\right)$ to each ground type $\tau$ such that $\rho_{\mathcal{P}}(\tau) \subseteq \rho_{\mathcal{A}}(\tau)$, e.g., $\rho(\text{Int}) = \left(\left\{2m : m \in \mathbb{Z}\right\}, \mathbb{Z}\right)$.
 
 \pause
 \medskip
@@ -435,7 +442,7 @@ Then to type $\alpha$, we are going to assign a pair of sets $\lBrace \alpha \rB
     \item $\lBrace \alpha \rightarrow \beta \rBrace_{\rho} = \left(\left\{ f : \forall x \in \mathcal{P}\lBrace \alpha \rBrace_{\rho}. f(x) \in \mathcal{P}\lBrace \beta \rBrace_{\rho} \right\},\, \mathcal{A}\lBrace \alpha \rBrace_{\rho} \rightarrow \mathcal{A}\lBrace \beta \rBrace_{\rho}\right)$
 \end{itemize}
 
-Note that $\mathcal{A}\lBrace \alpha \rBrace_{\rho} = \llbracket\alpha \rrbracket_{\rho_{\mathcal{A}}}$ 
+Note that $\mathcal{A}\lBrace \alpha \rBrace_{\rho} = \llbracket\alpha \rrbracket_{\rho_{\mathcal{A}}}$.
 
 \end{frame}
 
@@ -489,6 +496,50 @@ as $\lBrace \Gamma \vdash M : \alpha \rBrace_{\rho, \sigma} := \llbracket \Gamma
 
 This is known as the \emph{Fundamental Theorem of Logical Relations}, or the \emph{Basic Lemma of Logical Relations}.
 Note that we had to choose the interpretation $\sigma$ of our constants and built-in functions to respect $\rho_{\mathcal{P}}$.
+\end{frame}
+
+\begin{frame}
+\frametitle{Example Application: Preserving Evenness}
+
+\begin{itemize}
+    \item Fix the ground types to be $\{\text{Int}\}$.
+    \pause
+    \item Fix a signature $\Sigma = \left(\left\{\underline{n} : n \in \mathbb{Z},\, n \text{ even}\right\}, \left\{\underline{+}, \underline{\times}\right\}\right)$, everything using $\text{Int}$.
+    \pause
+    \item Interpret our ground types with $\rho(\text{Int}) = \left(\left\{2m : m \in \mathbb{Z}\right\}, \mathbb{Z}\right)$.
+    \pause
+    \item Interpret our signature with $\sigma\left(\underline{n}\right) = n, \sigma\left(\underline{+}\right) = +, \sigma\left(\underline{\times}\right) = \times$ and check that our functions preserve even numbers.
+    \pause
+    \item Apply the theorem! For example, for all terms $x : \text{Int} \vdash M : \text{Int}$, we have
+    \[
+    x \in \mathcal{P}\lBrace \text{Int} \rBrace_\rho \Rightarrow \llbracket x : \text{Int} \vdash M : \text{Int} \rrbracket_{\rho_{\mathcal{A}}, \sigma}(x) \in \mathcal{P}\lBrace \text{Int} \rBrace_\rho
+    \]
+    which is equivalent to
+    \[
+    n \text{ even} \Rightarrow \llbracket x : \text{Int} \vdash M : \text{Int} \rrbracket_{\rho_{\mathcal{A}}, \sigma}(n) \text{ even}.
+    \]
+    \pause
+    \item Importantly, the theorem also applies to contexts with function types.
+    If we have $f : \text{Int} \to \text{Int}$, we are forced to feed in a function from $\mathcal{P}\lBrace \text{Int} \to \text{Int} \rBrace_\rho$, which are exactly even preserving functions!
+\end{itemize}
+
+\end{frame}
+
+\begin{frame}
+\frametitle{Conclusion}
+
+\begin{itemize}
+    \item We saw the
+    \begin{itemize}
+        \item syntax,
+        \item typing rules,
+        \item equational rules, and
+        \item set-theoretic denotational semantics
+    \end{itemize}
+     of simply typed lambda calculus with products, ground types, constants, and built-in functions.
+    \item We then extended the denotational semantics to include a predicate at each type, and observed that all of our constructions respected these predicates.
+    \item The preservation gave use the Fundamental Theorem of Logical Relations, which we then applied to an example.
+\end{itemize}
 \end{frame}
 
 \begin{frame}
