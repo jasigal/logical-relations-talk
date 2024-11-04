@@ -52,10 +52,15 @@
 
 \begin{itemize}
     \item When we write programs, we want to be able to reason about what they do.
+    \pause
     \item But what if we want to prove something about \emph{all} programs in a language?
+    \pause
     \item For example, if we have a language with an integer type, addition, and multiplication.
+    \pause
     \item How could we prove that if we only ever input even numbers that we always get even numbers out?
+    \pause
     \item Logical relations is a proof method that lets us easily prove the above, as well as many more complicated and interesting theorems.
+    \pause
     \item For example, we can prove that every simply typed lambda calculus term terminates!
 \end{itemize}
 \end{frame}
@@ -87,7 +92,7 @@ Everything is defined with respect to a signature $\Sigma$.
 \medskip
 
 For example, assume that we have $\text{Int}$ as ground type.
-Then we could defined $\Sigma = \left(\{\underline{x} : x \in \mathbb{Z}\}, \{+, \times\}\right)$ 
+Then we could defined $\Sigma = \left(\{\underline{i} : i \in \mathbb{Z}\}, \{+, \times\}\right)$ 
 
 \end{frame}
 
@@ -381,7 +386,8 @@ Then, for all valid equations $\Gamma \vdash M = N : \alpha$ we have
 \llbracket \Gamma \vdash M : \alpha \rrbracket_{\rho, \sigma} = \llbracket \Gamma \vdash N : \alpha \rrbracket_{\rho, \sigma}
 \]
 
-Thus, if we respect the axioms, then equivalent terms have equal denotational semantics.
+Thus, if we respect the axioms, then equivalent terms have equal denotational semantics. This is the minimum we expect from denotational semantics.
+
 \end{frame}
 
 
