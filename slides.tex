@@ -27,6 +27,40 @@
 \end{frame}
 
 \begin{frame}
+\frametitle{Overview}
+\begin{itemize}
+    \item What do we want to prove?
+    \item Lambda calculus (review?)
+    \begin{itemize}
+        \item Types
+        \item Signature
+        \item Syntax
+        \item Free variables
+        \item Substitution
+        \item Typing judgments
+        \item Equations-in-context
+        \item Equational reasoning rules
+        \item Denotational semantics
+        \item Soundness
+    \end{itemize}
+    \item Logical relations
+\end{itemize}
+\end{frame}
+
+\begin{frame}
+\frametitle{What do we want to prove?}
+
+\begin{itemize}
+    \item When we write programs, we want to be able to reason about what they do.
+    \item But what if we want to prove something about \emph{all} programs in a language?
+    \item For example, if we have a language with an integer type, addition, and multiplication.
+    \item How could we prove that if we only ever input even numbers that we always get even numbers out?
+    \item Logical relations is a proof method that lets us easily prove the above, as well as many more complicated and interesting theorems.
+    \item For example, we can prove that every simply typed lambda calculus term terminates!
+\end{itemize}
+\end{frame}
+
+\begin{frame}
 \frametitle{Types*}
 \[
 \alpha, \beta ::= \tau \mid 1 \mid \alpha_1 \times \alpha_2 \mid \alpha \rightarrow \beta
@@ -50,13 +84,18 @@ A signature $\Sigma = (\Sigma_{\text{const}}, \Sigma_{\text{func}})$ is composed
 \end{itemize}
 Everything is defined with respect to a signature $\Sigma$.
 
+\medskip
+
+For example, assume that we have $\text{Int}$ as ground type.
+Then we could defined $\Sigma = \left(\{\underline{x} : x \in \mathbb{Z}\}, \{+, \times\}\right)$ 
+
 \end{frame}
 
 \begin{frame}
 \frametitle{Syntax*}
 
 \[
-M, N ::= x \mid c \mid f(M_1, \ldots, M_n) \mid \lambda x: \alpha. M \mid M \, N \mid \langle M_1, M_2 \rangle \mid \pi_1(M) \mid \pi_2(M)
+M, N ::= x \mid \langle \rangle \mid c \mid f(M_1, \ldots, M_n) \mid \lambda x: \alpha. M \mid M \, N \mid \langle M_1, M_2 \rangle \mid \pi_1(M) \mid \pi_2(M)
 \]
 
 Where:
@@ -80,12 +119,18 @@ The function $\text{FV}(M)$ is defined recursively as follows:
     \item $\text{FV}(\langle \rangle) = \emptyset$
     \item $\text{FV}(c) = \emptyset$
     \item $\text{FV}(f(M_1, \ldots, M_n)) = \bigcup_{i=1}^{n} \text{FV}(M_i)$
+    \pause
     \item $\text{FV}(\lambda x: \alpha. M) = \text{FV}(M) \setminus \{x\}$
+    \pause
     \item $\text{FV}(M \, N) = \text{FV}(M) \cup \text{FV}(N)$
     \item $\text{FV}(\langle M_1, M_2 \rangle) = \text{FV}(M_1) \cup \text{FV}(M_2)$
     \item $\text{FV}(\pi_1(M)) = \text{FV}(M)$
     \item $\text{FV}(\pi_2(M)) = \text{FV}(M)$
 \end{itemize}
+
+\pause
+For example, $\text{FV}(\lambda x: \alpha. y \, x) = \{y\}$.
+
 \end{frame}
 
 \begin{frame}
@@ -96,19 +141,38 @@ Substitution of $N$ for $x$ in $M$ in a capture-avoiding way, denoted $M[x := N]
 \begin{itemize}
     \item $x[x := N] = N$
     \item $y[x := N] = y$, for $y \neq x$
+    \pause
     \item $\langle \rangle[x := N] = \langle \rangle$
     \item $c[x := N] = c$
+    \pause
     \item $f(M_1, \ldots, M_n)[x := N] = f(M_1[x := N], \ldots, M_n[x := N]))$
     \item $(M \, P)[x := N] = (M[x := N]) \, (P[x := N])$
     \item $\langle M_1 , M_2 \rangle[x := N] = \langle M_1[x := N], M_2[x := N] \rangle$
     \item $\pi_1(M)[x := N] = \pi_1(M[x := N])$
     \item $\pi_2(M)[x := N] = \pi_2(M[x := N])$
+    \item $\ldots$
+\end{itemize}
+\end{frame}
+
+\begin{frame}
+\frametitle{Capture-avoiding substitution (continued)*}
+
+Most importantly, we have the rule for abstraction:
+
+\begin{itemize}
     \item $(\lambda y : \alpha. M)[x := N] =
     \begin{cases}
     \lambda y : \alpha. M[x := N] & \text{if } y \neq x \text{ and } y \notin \text{FV}(N) \\
     \lambda z : \alpha. M[y := z][x := N] & \text{if } y = x \text{ or } y \in \text{FV}(N)
     \end{cases}$
 \end{itemize}
+\pause
+Here are two examples:
+\begin{itemize}
+    \item $(\lambda y : \alpha. x)[x := z] = \lambda y : \alpha. z$
+    \item $(\lambda y : \alpha. y \, x)[x := y] = \lambda z : \alpha. z \, y$
+\end{itemize}
+
 \end{frame}
 
 \begin{frame}
@@ -121,17 +185,17 @@ Substitution of $N$ for $x$ in $M$ in a capture-avoiding way, denoted $M[x := N]
 \qquad
 \infer{\Gamma \vdash c : \tau}{c : \tau \in \Sigma_{\text{const}}}
 \]
-
+\pause
 \[
 \infer{\Gamma \vdash f(M_1, \ldots, M_n) : \sigma}{\Gamma \vdash M_1 : \tau_1 & \ldots & \Gamma \vdash M_n : \tau_n & f : (\tau_1, \ldots, \tau_n) \rightarrow \sigma \in \Sigma_{\text{func}}}
 \]
-
+\pause
 \[
 \infer{\Gamma \vdash \lambda x : \alpha. M : \alpha \rightarrow \beta}{\Gamma, x : \alpha \vdash M : \beta}
 \qquad
 \infer{\Gamma \vdash M \, N : \beta}{\Gamma \vdash M : \alpha \rightarrow \beta & \Gamma \vdash N : \alpha}
 \]
-
+\pause
 \[
 \infer{\Gamma \vdash \langle M_1, M_2 \rangle : \alpha_1 \times \alpha_2}{\Gamma \vdash M_1 : \alpha & \Gamma \vdash M_2 : \alpha_2}
 \qquad
