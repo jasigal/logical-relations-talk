@@ -100,7 +100,7 @@ Then we could defined $\Sigma = \left(\{\underline{i} : i \in \mathbb{Z}\}, \{+,
 \frametitle{Syntax*}
 
 \[
-M, N ::= x \mid \langle \rangle \mid c \mid f(M_1, \ldots, M_n) \mid \lambda x: \alpha. M \mid M \, N \mid \langle M_1, M_2 \rangle \mid \pi_1(M) \mid \pi_2(M)
+M, N ::= x \mid \langle \rangle \mid c \mid f(M_1, \ldots, M_n) \mid \lambda (x: \alpha). M \mid M \, N \mid \langle M_1, M_2 \rangle \mid \pi_1(M) \mid \pi_2(M)
 \]
 
 Where:
@@ -109,7 +109,7 @@ Where:
     \item $\langle \rangle$ is the term of type $1$,
     \item $c$ is a constant symbol in $\Sigma_{\text{const}}$,
     \item $f$ is a function symbol in $\Sigma_{\text{func}}$,
-    \item $\lambda x: \alpha. M$ is lambda abstraction with $\alpha$ is a type,
+    \item $\lambda (x: \alpha). M$ is lambda abstraction with $x$ of type $\alpha$,
     \item $M\, N$ is application,
     \item $\langle M_1, M_2 \rangle$ is a product,
     \item $\pi_1(M)$ and $\pi_2(M)$ are projections.
@@ -125,7 +125,7 @@ The function $\text{FV}(M)$ is defined recursively as follows:
     \item $\text{FV}(c) = \emptyset$
     \item $\text{FV}(f(M_1, \ldots, M_n)) = \bigcup_{i=1}^{n} \text{FV}(M_i)$
     \pause
-    \item $\text{FV}(\lambda x: \alpha. M) = \text{FV}(M) \setminus \{x\}$
+    \item $\text{FV}(\lambda (x: \alpha). M) = \text{FV}(M) \setminus \{x\}$
     \pause
     \item $\text{FV}(M \, N) = \text{FV}(M) \cup \text{FV}(N)$
     \item $\text{FV}(\langle M_1, M_2 \rangle) = \text{FV}(M_1) \cup \text{FV}(M_2)$
@@ -134,7 +134,7 @@ The function $\text{FV}(M)$ is defined recursively as follows:
 \end{itemize}
 
 \pause
-For example, $\text{FV}(\lambda x: \alpha. y \, x) = \{y\}$.
+For example, $\text{FV}(\lambda (x: \alpha). y \, x) = \{y\}$.
 
 \end{frame}
 
@@ -165,17 +165,17 @@ Substitution of $N$ for $x$ in $M$ in a capture-avoiding way, denoted $M[x := N]
 Most importantly, we have the rule for abstraction:
 
 \begin{itemize}
-    \item $(\lambda y : \alpha. M)[x := N] =
+    \item $(\lambda (y : \alpha). M)[x := N] =
     \begin{cases}
-    \lambda y : \alpha. M[x := N] & \text{if } y \neq x \text{ and } y \notin \text{FV}(N) \\
-    \lambda z : \alpha. M[y := z][x := N] & \text{if } y = x \text{ or } y \in \text{FV}(N)
+    \lambda (y : \alpha). M[x := N] & \text{if } y \neq x \text{ and } y \notin \text{FV}(N) \\
+    \lambda (z : \alpha). M[y := z][x := N] & \text{if } y = x \text{ or } y \in \text{FV}(N)
     \end{cases}$
 \end{itemize}
 \pause
 Here are two examples:
 \begin{itemize}
-    \item $(\lambda y : \alpha. x)[x := z] = \lambda y : \alpha. z$
-    \item $(\lambda y : \alpha. y \, x)[x := y] = \lambda z : \alpha. z \, y$
+    \item $(\lambda (y : \alpha). x)[x := z] = \lambda (y : \alpha). z$
+    \item $(\lambda (y : \alpha). y \, x)[x := y] = \lambda (z : \alpha). z \, y$
 \end{itemize}
 
 \end{frame}
@@ -196,7 +196,7 @@ Here are two examples:
 \]
 \pause
 \[
-\infer{\Gamma \vdash \lambda x : \alpha. M : \alpha \rightarrow \beta}{\Gamma, x : \alpha \vdash M : \beta}
+\infer{\Gamma \vdash \lambda (x : \alpha). M : \alpha \rightarrow \beta}{\Gamma, x : \alpha \vdash M : \beta}
 \qquad
 \infer{\Gamma \vdash M \, N : \beta}{\Gamma \vdash M : \alpha \rightarrow \beta & \Gamma \vdash N : \alpha}
 \]
@@ -278,15 +278,15 @@ Equations-in-contexts allow us to perform equational reasoning while respecting 
 \frametitle{Rules for Functions*}
 
 \[
-\infer[\text{($\beta$-Eq)}]{\Gamma \vdash (\lambda x : \alpha. M) \, N = M[x := N] : \beta}{\Gamma \vdash N : \alpha}
+\infer[\text{($\beta$-Eq)}]{\Gamma \vdash (\lambda (x : \alpha). M) \, N = M[x := N] : \beta}{\Gamma \vdash N : \alpha}
 \]
 
 \[
-\infer[\text{($\eta$-Eq)}]{\Gamma \vdash \lambda x : \alpha. (M \, x) = M : \alpha \rightarrow \beta}{x \not\in \text{FV}(M)}
+\infer[\text{($\eta$-Eq)}]{\Gamma \vdash \lambda (x : \alpha). (M \, x) = M : \alpha \rightarrow \beta}{x \not\in \text{FV}(M)}
 \]
 
 \[
-\infer[\text{($\lambda$-Cong)}]{\Gamma \vdash \lambda x : \alpha. M = \lambda x : \alpha. N : \alpha \rightarrow \beta}{\Gamma, x : \alpha \vdash M = N : \beta}
+\infer[\text{($\lambda$-Cong)}]{\Gamma \vdash \lambda (x : \alpha). M = \lambda (x : \alpha). N : \alpha \rightarrow \beta}{\Gamma, x : \alpha \vdash M = N : \beta}
 \]
 
 \end{frame}
@@ -299,7 +299,7 @@ For a set of axioms $\Omega$, we have the rule
 \[
 \infer[\text{(Axiom)}]{\Gamma \vdash M = N : \alpha}{\left(\Gamma \vdash M : \alpha, \Gamma \vdash N : \alpha\right) \in \Omega}
 \]
-Note that it is possible to prove false if you choose your axioms wrong!
+Note that it is possible to prove everything equals everything else if you choose your axioms wrong!
 \end{frame}
 
 \begin{frame}
@@ -360,9 +360,9 @@ The denotational semantics $\llbracket \Gamma \vdash M : \alpha \rrbracket_{\rho
     \item $\llbracket \Gamma \vdash x : \alpha \rrbracket_{\rho,\sigma} (\gamma) = \gamma(x)$
     \item $\llbracket \Gamma \vdash \langle \rangle : 1 \rrbracket_{\rho,\sigma} (\gamma) = \star$
     \item $\llbracket \Gamma \vdash c : \tau \rrbracket_{\rho,\sigma} (\gamma) = \sigma(c)$
-    \item $\llbracket \Gamma \vdash f(M_1, \ldots, M_n) : \sigma \rrbracket_{\rho,\sigma} (\gamma) = \sigma(f)$
+    \item $\llbracket \Gamma \vdash f(M_1, \ldots, M_n) : \sigma \rrbracket_{\rho,\sigma} (\gamma) =$ $\phantom{.}\quad\sigma(f)(\llbracket \Gamma \vdash M_1 : \tau_1 \rrbracket_{\rho,\sigma} (\gamma), \ldots, \llbracket \Gamma \vdash M_n : \tau_n \rrbracket_{\rho,\sigma} (\gamma))$
     \pause
-    \item $\llbracket \Gamma \vdash \lambda x : \alpha. M : \alpha \rightarrow \beta \rrbracket_{\rho,\sigma} (\gamma) = \lambda x. \llbracket \Gamma, x:\alpha \vdash M : \beta \rrbracket_{\rho,\sigma} (\gamma[x \mapsto v])$
+    \item $\llbracket \Gamma \vdash \lambda (x : \alpha). M : \alpha \rightarrow \beta \rrbracket_{\rho,\sigma} (\gamma) = \lambda v. \llbracket \Gamma, x:\alpha \vdash M : \beta \rrbracket_{\rho,\sigma} (\gamma[x \mapsto v])$
     \pause
     \item $\llbracket \Gamma \vdash M \, N : \beta \rrbracket_{\rho,\sigma} (\gamma) = \llbracket M \rrbracket_{\rho,\sigma}(\gamma)(\llbracket N \rrbracket_{\rho,\sigma}(\gamma))$
     \item $\llbracket \Gamma \vdash \langle M_1, M_2 \rangle : \alpha_1 \times \alpha_2 \rrbracket_{\rho,\sigma} (\gamma) = (\llbracket M_1 \rrbracket_{\rho,\sigma}(\gamma), \llbracket M_2 \rrbracket_{\rho,\sigma}(\gamma))$
