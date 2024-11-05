@@ -300,7 +300,7 @@ Equations-in-contexts allow us to perform equational reasoning while respecting 
 \frametitle{Rules for Functions*}
 
 \[
-\infer[\text{($\beta$-Eq)}]{\Gamma \vdash (\lambda (x : \alpha). M) \, N = M[x := N] : \beta}{\Gamma \vdash N : \alpha}
+\infer[\text{($\beta$-Eq)}]{\Gamma \vdash (\lambda (x : \alpha). M) \, N = M[x := N] : \beta}{\Gamma, x : \alpha \vdash M : \beta & \Gamma \vdash N : \alpha}
 \]
 
 \[
@@ -452,22 +452,38 @@ Note that $\mathcal{A}\lBrace \alpha \rBrace_{\rho} = \llbracket\alpha \rrbracke
 For a fixed $\rho$ assigning ground types to sets, we can give an interpretation $\sigma$  to the constants and functions of a signature $\Sigma = (\Sigma_{\text{const}}, \Sigma_{\text{func}})$:
 \begin{itemize}
     \item for each $c : \tau \in \Sigma_{\text{const}}$, an element $\sigma(c) \in \rho_{\mathcal{P}}(\tau)$; and
-    \item for each $f : (\tau_1, \ldots, \tau_n) \to \tau \in \Sigma_{\text{func}}$, a function $\sigma(f) \in \rho_{\mathcal{A}}(\tau_1) \times \cdots \times \rho_{\mathcal{A}}(\tau_n) \to \rho_{\mathcal{A}}(\tau)$ such that if $(x_1, \ldots, x_n) \in \rho_{\mathcal{P}}(\tau_1) \times \cdots \times \rho_{\mathcal{P}}(\tau_n)$ then $\sigma(f)(x_1, \ldots, x_n) \in \rho_{\mathcal{P}}(\tau)$.
+    \item for each $f : (\tau_1, \ldots, \tau_n) \to \tau \in \Sigma_{\text{func}}$, a function
+    \[\sigma(f) \in \rho_{\mathcal{A}}(\tau_1) \times \cdots \times \rho_{\mathcal{A}}(\tau_n) \to \rho_{\mathcal{A}}(\tau)\]
+    such that
+    \[(x_1, \ldots, x_n) \in \rho_{\mathcal{P}}(\tau_1) \times \cdots \times \rho_{\mathcal{P}}(\tau_n) \Rightarrow \sigma(f)(x_1, \ldots, x_n) \in \rho_{\mathcal{P}}(\tau).\]
 \end{itemize}
+
+\medskip
+
 Note that $\sigma(c) \in \mathcal{P}\lBrace \tau \rBrace_{\rho}$ and $\sigma(f) \in \mathcal{P}\lBrace \tau_1 \times \cdots \times \tau_n \rightarrow \tau \rBrace_{\rho}$, as well as that $\sigma(c) \in \llbracket \tau \rrbracket_{\rho_{\mathcal{A}}}$ and $\sigma(f) \in \llbracket \tau_1 \times \cdots \times \tau_n \rightarrow \tau \rrbracket_{\rho_{\mathcal{A}}}$.
+
+\medskip
+
+If we want to forget that $\sigma$ preserves our predicates, we will write $\sigma_{\mathcal{A}}$.
+
 \end{frame}
 
 \begin{frame}
 \frametitle{Logical Relations Semantics for Terms in Context}
 
-Fix a fixed $\rho$ and $\sigma$, we can again define the meaning of a lambda term.
-In a context $\Gamma = x_1 : \alpha_1, \ldots, x_n : \alpha_n$, the logical relations semantics of a term $M$ is a function:
+Fix a fixed $\rho$ and $\sigma$, we want to define the meaning of a lambda term.
+In a context $\Gamma = x_1 : \alpha_1, \ldots, x_n : \alpha_n$, we want an interpretation of type
 
 \[
 \lBrace \Gamma \vdash M : \alpha \rBrace_{\rho, \sigma} : \mathcal{A}\lBrace \alpha_1 \times \cdots \times \alpha_n \rBrace_\rho \to \mathcal{A}\lBrace \alpha \rBrace_\rho
 \]
 
 such that for all $\gamma \in \mathcal{P}\lBrace \alpha_1 \times \cdots \times \alpha_n \rBrace_\rho$ we have $\lBrace \Gamma \vdash M : \alpha \rBrace_{\rho, \sigma}(\gamma) \in \mathcal{P}\lBrace \alpha \rBrace_\rho$.
+I.e., we map values satisfying our predicate to values satisfying our predicate.
+
+\medskip
+
+How do we define this semantics?
 
 \end{frame}
 
@@ -481,12 +497,13 @@ Thus, we can define
 \lBrace \Gamma \vdash M : \alpha \rBrace_{\rho, \sigma} : \mathcal{A}\lBrace \alpha_1 \times \cdots \times \alpha_n \rBrace_\rho \to \mathcal{A}\lBrace \alpha \rBrace_\rho
 \]
 
-as $\lBrace \Gamma \vdash M : \alpha \rBrace_{\rho, \sigma} := \llbracket \Gamma \vdash M : \alpha \rrbracket_{\rho_{\mathcal{A}}, \sigma}$ if for all $\gamma \in \mathcal{P}\lBrace \alpha_1 \times \cdots \times \alpha_n \rBrace_\rho$ we have $\llbracket \Gamma \vdash M : \alpha \rrbracket_{\rho_{\mathcal{A}}, \sigma}(\gamma) \in \mathcal{P}\lBrace \alpha \rBrace_\rho$.
+as $\lBrace \Gamma \vdash M : \alpha \rBrace_{\rho, \sigma} := \llbracket \Gamma \vdash M : \alpha \rrbracket_{\rho_{\mathcal{A}}, \sigma_{\mathcal{A}}}$ if it actually preserves our predicates.
 
 \medskip
 
 \begin{theorem}
-    For all $\gamma \in \mathcal{P}\lBrace \alpha_1 \times \cdots \times \alpha_n \rBrace_\rho$ we have $\llbracket \Gamma \vdash M : \alpha \rrbracket_{\rho_{\mathcal{A}}, \sigma}(\gamma) \in \mathcal{P}\lBrace \alpha \rBrace_\rho$.
+    Fix $\rho$ and $\sigma$ for logical relations.
+    For all $\gamma \in \mathcal{P}\lBrace \alpha_1 \times \cdots \times \alpha_n \rBrace_\rho$ we have $\llbracket \Gamma \vdash M : \alpha \rrbracket_{\rho_{\mathcal{A}}, \sigma_{\mathcal{A}}}(\gamma) \in \mathcal{P}\lBrace \alpha \rBrace_\rho$.
     \begin{proof}
         Induction on the structure of $M$.
     \end{proof}
@@ -512,13 +529,15 @@ Note that we had to choose the interpretation $\sigma$ of our constants and buil
     \pause
     \item Apply the theorem! For example, for all terms $x : \text{Int} \vdash M : \text{Int}$, we have
     \[
-    x \in \mathcal{P}\lBrace \text{Int} \rBrace_\rho \Rightarrow \llbracket x : \text{Int} \vdash M : \text{Int} \rrbracket_{\rho_{\mathcal{A}}, \sigma}(x) \in \mathcal{P}\lBrace \text{Int} \rBrace_\rho
+    n \in \mathcal{P}\lBrace \text{Int} \rBrace_\rho \Rightarrow \llbracket x : \text{Int} \vdash M : \text{Int} \rrbracket_{\rho_{\mathcal{A}}, \sigma}(n) \in \mathcal{P}\lBrace \text{Int} \rBrace_\rho
     \]
     which is equivalent to
     \[
     n \text{ even} \Rightarrow \llbracket x : \text{Int} \vdash M : \text{Int} \rrbracket_{\rho_{\mathcal{A}}, \sigma}(n) \text{ even}.
     \]
+    \vspace{-12pt}
     \pause
+    \item Can also show that all polynomials with even coefficients preserve evenness.
     \item Importantly, the theorem also applies to contexts with function types.
     If we have $f : \text{Int} \to \text{Int}$, we are forced to feed in a function from $\mathcal{P}\lBrace \text{Int} \to \text{Int} \rBrace_\rho$, which are exactly even preserving functions!
 \end{itemize}
