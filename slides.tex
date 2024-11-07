@@ -12,6 +12,16 @@
 \usepackage{amssymb}
 \usepackage{proof}
 \usepackage{stmaryrd}
+\usepackage[absolute,overlay]{textpos}
+
+\usetheme{default}
+\usecolortheme{seahorse}
+\addtobeamertemplate{navigation symbols}{}{%
+    \usebeamerfont{footline}%
+    \usebeamercolor[fg]{footline}%
+    \hspace{1em}%
+    \raisebox{1.2pt}[0pt][0pt]{\insertframenumber/\insertmainframenumber}
+}
 
 \setbeamertemplate{itemize item}[circle]
 \setbeamertemplate{itemize subitem}[circle]
@@ -32,7 +42,7 @@
 \begin{frame}
 \frametitle{Attribution}
 \begin{itemize}
-\item Slides with $*$ at the end of their title were written with the help of GPT 4o.
+\item Slides with $*$ at the end of their title were written with the help of GPT 4o (for lazy \LaTeX'ing).
 \item Most things for the calculus are in line with \cite{Crole_1994}.
 \end{itemize}
 \end{frame}
@@ -46,13 +56,8 @@
         \item Types
         \item Signatures
         \item Syntax
-        \item Free variables
-        \item Substitution
         \item Typing judgments
-        \item Equations-in-context
-        \item Equational reasoning rules
         \item Denotational semantics
-        \item Soundness
     \end{itemize}
     \item Logical relations
     \begin{itemize}
@@ -68,51 +73,72 @@
 \begin{frame}
 \frametitle{What do we want to prove?}
 
+\pause
 \begin{itemize}
-    \item When we write programs, we want to be able to reason about what they do.
+    \item Proving something about \emph{all} programs in a language?
     \pause
-    \item But what if we want to prove something about \emph{all} programs in a language?
+    \item If we have $+$ and $\times$, how can we prove even in $\Rightarrow$ even out?
     \pause
-    \item Suppose we have a language with an integer type, addition, and multiplication.
-    How could we prove that if we only ever input even numbers that we always get even numbers out?
+    \item Logical relations!
     \pause
-    \item Logical relations is a proof method that lets us easily prove the above, as well as many more complicated and interesting theorems.
+    \item Also can prove more complicated and interesting theorems.
     \pause
     \item For example:
     \begin{itemize}
-        \item Termination
-        \item Type safety
-        \item Program equivalence (optimizations, representation independence)
+        \pause
+        \item Termination: do your programs stop?
+        \pause
+        \item Type safety: do your programs keep going?
+        \pause
+        \item Optimizations: why can I rewrite my program?
+        \pause
+        \item Representation independence: internals don't matter if you hide them.
+        \pause
+        \item Security: show the output doesn't depend on secure information.
     \end{itemize}
 \end{itemize}
 \end{frame}
 
 \begin{frame}
 \frametitle{Types*}
+
+\pause
+
 \[
 \alpha, \beta ::= \tau \mid 1 \mid \alpha_1 \times \alpha_2 \mid \alpha \rightarrow \beta
 \]
 
+\pause
 Where:
 \begin{itemize}
     \item $\tau$ is a ground type from a fixed set of symbols, e.g.\ $\{\text{Int}, \text{Bool}, \ldots\},$
+    \pause
     \item $1$ is the unit type,
+    \pause
     \item $\alpha_1 \times \alpha_2$ is a product type,
+    \pause
     \item $\alpha \rightarrow \beta$ is a function type.
 \end{itemize}
 \end{frame}
 
 \begin{frame}
 \frametitle{Signatures}
+
+\pause
+
 A signature $\Sigma = (\Sigma_{\text{const}}, \Sigma_{\text{func}})$ is composed of two sets, namely
 \begin{itemize}
+    \pause
     \item $\Sigma_{\text{const}}$ whose elements are constant symbols $c : \tau$; and
+    \pause
     \item $\Sigma_{\text{func}}$ whose elements are function symbols $f : (\tau_1, \ldots, \tau_n) \to \tau$.
 \end{itemize}
+\pause
 Everything is defined with respect to a signature $\Sigma$.
 
 \medskip
 
+\pause
 For example, assume that we have $\text{Int}$ as ground type.
 Then we could defined $\Sigma = \left(\left\{\underline{n} : n \in \mathbb{Z},\right\}, \left\{\underline{+}, \underline{\times}\right\}\right)$. 
 
@@ -121,21 +147,341 @@ Then we could defined $\Sigma = \left(\left\{\underline{n} : n \in \mathbb{Z},\r
 \begin{frame}
 \frametitle{Syntax*}
 
+\pause
+
 \[
 M, N ::= x \mid \langle \rangle \mid c \mid f(M_1, \ldots, M_n) \mid \lambda (x: \alpha). M \mid M \, N \mid \langle M_1, M_2 \rangle \mid \pi_1(M) \mid \pi_2(M)
 \]
 
+\pause
 Where:
 \begin{itemize}
     \item $x$ is a variable from a countably infinite set $\{x, y, z, \ldots \}$,
+    \pause
     \item $\langle \rangle$ is the term of type $1$,
+    \pause
     \item $c$ is a constant symbol in $\Sigma_{\text{const}}$,
+    \pause
     \item $f$ is a function symbol in $\Sigma_{\text{func}}$,
+    \pause
     \item $\lambda (x: \alpha). M$ is lambda abstraction with $x$ of type $\alpha$,
+    \pause
     \item $M\, N$ is application,
+    \pause
     \item $\langle M_1, M_2 \rangle$ is a product,
+    \pause
     \item $\pi_1(M)$ and $\pi_2(M)$ are projections.
 \end{itemize}
+\end{frame}
+
+\begin{frame}
+\frametitle{Typing Judgments*}
+
+\pause
+\[
+\infer{\Gamma \vdash x : \alpha}{(x : \alpha) \in \Gamma}
+\qquad
+\pause
+\infer{\Gamma \vdash \langle \rangle : 1}{}
+\pause
+\qquad
+\infer{\Gamma \vdash c : \tau}{c : \tau \in \Sigma_{\text{const}}}
+\]
+\pause
+\[
+\infer{\Gamma \vdash f(M_1, \ldots, M_n) : \tau}{\Gamma \vdash M_1 : \tau_1 & \cdots & \Gamma \vdash M_n : \tau_n & f : (\tau_1, \ldots, \tau_n) \rightarrow \tau \in \Sigma_{\text{func}}}
+\]
+\pause
+\[
+\infer{\Gamma \vdash \lambda (x : \alpha). M : \alpha \rightarrow \beta}{\Gamma, x : \alpha \vdash M : \beta}
+\pause
+\qquad
+\infer{\Gamma \vdash M \, N : \beta}{\Gamma \vdash M : \alpha \rightarrow \beta & \Gamma \vdash N : \alpha}
+\]
+\pause
+\[
+\infer{\Gamma \vdash \langle M_1, M_2 \rangle : \alpha_1 \times \alpha_2}{\Gamma \vdash M_1 : \alpha_1 & \Gamma \vdash M_2 : \alpha_2}
+\pause
+\qquad
+\infer{\Gamma \vdash \pi_1(M) : \alpha_1}{\Gamma \vdash M : \alpha_1 \times \alpha_2}
+\pause
+\qquad
+\infer{\Gamma \vdash \pi_2(M) : \alpha_2}{\Gamma \vdash M : \alpha_1 \times \alpha_2}
+\]
+\end{frame}
+
+\begin{frame}
+\frametitle{Set-Theoretic Denotational Semantics for Types*}
+
+\pause
+
+Let $\rho$ be a function that assigns a set $\rho(\tau)$ to each ground type $\tau$, e.g., $\rho(\text{Int}) = \mathbb{Z}$, $\rho(\text{Bool}) = \{ \text{true}, \text{false} \}$.
+
+\pause
+\medskip
+
+Then to type $\alpha$, we are going to assign a set $\llbracket \alpha \rrbracket_{\rho}$ as follows:
+\begin{itemize}
+    \pause
+    \item $\llbracket \tau \rrbracket_{\rho} = \rho(\tau)$
+    \pause
+    \item $\llbracket 1 \rrbracket_{\rho} = \{\star\}$
+    \pause
+    \item $\llbracket \alpha_1 \times \alpha_2 \rrbracket_{\rho} = \llbracket \alpha_1 \rrbracket_{\rho} \times \llbracket \alpha_2 \rrbracket_{\rho}$
+    \pause
+    \item $\llbracket \alpha \rightarrow \beta \rrbracket_{\rho} = \llbracket \alpha \rrbracket_{\rho} \rightarrow \llbracket \beta \rrbracket_{\rho}$
+\end{itemize}
+\end{frame}
+
+\begin{frame}
+\frametitle{Set-Theoretic Denotational Semantics for Signatures}
+
+\pause
+
+For a fixed $\rho$ assigning ground types to sets, we can give an interpretation $\sigma$  to the constants and functions of a signature $\Sigma = (\Sigma_{\text{const}}, \Sigma_{\text{func}})$:
+\begin{itemize}
+    \pause
+    \item for each $c : \tau \in \Sigma_{\text{const}}$, an element $\sigma(c) \in \rho(\tau)$; and
+    \pause
+    \item for each $f : (\tau_1, \ldots, \tau_n) \to \tau \in \Sigma_{\text{func}}$, a function $\sigma(f) \in \rho(\tau_1) \times \!\cdots\! \times \rho(\tau_n) \to \rho(\tau)$.
+\end{itemize}
+\pause
+Note that $\sigma(c) \in \llbracket \tau \rrbracket_{\rho}$ and $\sigma(f) \in \llbracket \tau_1 \times \cdots \times \tau_n \rightarrow \tau \rrbracket_{\rho}$.
+\end{frame}
+
+\begin{frame}
+\frametitle{Set-Theoretic Denotational Semantics for Terms in Context*}
+
+\pause
+
+Fix a fixed $\rho$ and $\sigma$, we can define the meaning of a lambda term.
+In a context $\Gamma = x_1 : \alpha_1, \ldots, x_n : \alpha_n$, the denotational semantics of a term $M$ is a function:
+
+\[
+\llbracket \Gamma \vdash M : \alpha \rrbracket_{\rho, \sigma} : \llbracket \alpha_1 \times \cdots \times \alpha_n \rrbracket_\rho \to \llbracket \alpha \rrbracket_\rho
+\]
+
+For a $\Gamma$ as above, we will write $\gamma$ for an element of $\llbracket \alpha_1 \times \cdots \times \alpha_n \rrbracket_\rho$ and write $\gamma(x_i)$ for the $i^{\text{th}}$ component of the tuple.
+
+\pause
+\medskip
+
+We write $\gamma[x \mapsto v]$ to denote the extension of $\gamma$ mapping $x$ to $v$.
+E.g.\ for $\Gamma = x : \text{Int}, y : \text{Int}$ if $\{x \mapsto 1, y \mapsto 2\} \in \llbracket \text{Int} \times \text{Int} \rrbracket_\rho$ then
+\[
+\{x \mapsto 1, y \mapsto 2\}[z \mapsto 3] := \{x \mapsto 1, y \mapsto 2, z \mapsto 3\} \in \llbracket \text{Int} \times \text{Int} \times \text{Int}\rrbracket_\rho
+\]
+for $\Gamma = x : \text{Int}, y : \text{Int}, z : \text{Int}$.
+\end{frame}
+
+\begin{frame}
+\frametitle{Recursive Definition of Denotation for Terms*}
+
+\pause
+
+The denotational semantics $\llbracket \Gamma \vdash M : \alpha \rrbracket_{\rho,\sigma} (\gamma)$ is defined recursively as follows:
+
+\begin{itemize}
+    \pause
+    \item $\llbracket \Gamma \vdash x : \alpha \rrbracket_{\rho,\sigma} (\gamma) = \gamma(x)$
+    \pause
+    \item $\llbracket \Gamma \vdash \langle \rangle : 1 \rrbracket_{\rho,\sigma} (\gamma) = \star$
+    \pause
+    \item $\llbracket \Gamma \vdash c : \tau \rrbracket_{\rho,\sigma} (\gamma) = \sigma(c)$
+    \pause
+    \item $\llbracket \Gamma \vdash f(M_1, \ldots, M_n) : \sigma \rrbracket_{\rho,\sigma} (\gamma) =$ $\phantom{.}\quad\sigma(f)(\llbracket \Gamma \vdash M_1 : \tau_1 \rrbracket_{\rho,\sigma} (\gamma), \ldots, \llbracket \Gamma \vdash M_n : \tau_n \rrbracket_{\rho,\sigma} (\gamma))$
+    \pause
+    \item $\llbracket \Gamma \vdash \lambda (x : \alpha). M : \alpha \rightarrow \beta \rrbracket_{\rho,\sigma} (\gamma) = \lambda v. \llbracket \Gamma, x:\alpha \vdash M : \beta \rrbracket_{\rho,\sigma} (\gamma[x \mapsto v])$
+    \pause
+    \item $\llbracket \Gamma \vdash M \, N : \beta \rrbracket_{\rho,\sigma} (\gamma) = \llbracket M \rrbracket_{\rho,\sigma}(\gamma)(\llbracket N \rrbracket_{\rho,\sigma}(\gamma))$
+    \pause
+    \item $\llbracket \Gamma \vdash \langle M_1, M_2 \rangle : \alpha_1 \times \alpha_2 \rrbracket_{\rho,\sigma} (\gamma) = (\llbracket M_1 \rrbracket_{\rho,\sigma}(\gamma), \llbracket M_2 \rrbracket_{\rho,\sigma}(\gamma))$
+    \pause
+    \item $\llbracket \Gamma \vdash \pi_1(M) : \alpha_1 \rrbracket_{\rho,\sigma} (\gamma) = \pi_1(\llbracket M \rrbracket_{\rho,\sigma}(\gamma))$
+    \pause
+    \item $\llbracket \Gamma \vdash \pi_2(M) : \alpha_2 \rrbracket_{\rho,\sigma} (\gamma) = \pi_2(\llbracket M \rrbracket_{\rho,\sigma}(\gamma))$
+\end{itemize}
+\end{frame}
+
+\begin{frame}
+\frametitle{Logical Relations Semantics for Types}
+
+We can view logical relations as a new type of denotational semantics.
+We begin with the types.
+For each type $\alpha$, we're going to define \emph{two sets}, $P$ and $A$, such that $P \subseteq A$.
+The set $P$ is our \emph{predicate}.
+
+\pause
+\medskip
+
+Let $\rho$ be a function that assigns a pair of sets $\left(\rho_{\mathcal{P}}(\tau), \rho_{\mathcal{A}}(\tau)\right)$ to each ground type $\tau$ such that $\rho_{\mathcal{P}}(\tau) \subseteq \rho_{\mathcal{A}}(\tau)$, e.g., $\rho(\text{Int}) = \left(\left\{2m : m \in \mathbb{Z}\right\}, \mathbb{Z}\right)$.
+
+\pause
+\medskip
+
+Then to type $\alpha$, we are going to assign a pair of sets $\lBrace \alpha \rBrace_{\rho} = \left(\mathcal{P}\lBrace \alpha \rBrace_{\rho}, \mathcal{A}\lBrace \alpha \rBrace_{\rho}\right)$ as follows:
+
+\begin{itemize}
+    \pause
+    \item $\lBrace \tau \rBrace_{\rho} = \left(\rho_{\mathcal{P}}(\tau), \rho_{\mathcal{A}}(\tau)\right)$
+    \pause
+    \item $\lBrace 1 \rBrace_{\rho} = \left(\{\star\}, \{\star\}\right)$
+    \pause
+    \item $\lBrace \alpha_1 \times \alpha_2 \rBrace_{\rho} = \left(\mathcal{P}\lBrace \alpha_1 \rBrace_{\rho} \times \mathcal{P}\lBrace \alpha_2 \rBrace_{\rho}, \mathcal{A}\lBrace \alpha_1 \rBrace_{\rho} \times \mathcal{A}\lBrace \alpha_2 \rBrace_{\rho}\right)$
+    \pause
+    \item $\lBrace \alpha \rightarrow \beta \rBrace_{\rho} = \left(\left\{ f : \forall x \in \mathcal{P}\lBrace \alpha \rBrace_{\rho}. f(x) \in \mathcal{P}\lBrace \beta \rBrace_{\rho} \right\},\, \mathcal{A}\lBrace \alpha \rBrace_{\rho} \rightarrow \mathcal{A}\lBrace \beta \rBrace_{\rho}\right)$
+\end{itemize}
+
+\pause
+
+Note that $\mathcal{A}\lBrace \alpha \rBrace_{\rho} = \llbracket\alpha \rrbracket_{\rho_{\mathcal{A}}}$.
+
+\end{frame}
+
+\begin{frame}
+\frametitle{Logical Relations Semantics for Signatures}
+
+\pause
+
+For a fixed $\rho$ assigning ground types to sets, we can give an interpretation $\sigma$  to the constants and functions of a signature $\Sigma = (\Sigma_{\text{const}}, \Sigma_{\text{func}})$:
+\begin{itemize}
+    \pause
+    \item for each $c : \tau \in \Sigma_{\text{const}}$, an element $\sigma(c) \in \rho_{\mathcal{P}}(\tau)$; and
+    \pause
+    \item for each $f : (\tau_1, \ldots, \tau_n) \to \tau \in \Sigma_{\text{func}}$, a function
+    \[\sigma(f) \in \rho_{\mathcal{A}}(\tau_1) \times \cdots \times \rho_{\mathcal{A}}(\tau_n) \to \rho_{\mathcal{A}}(\tau)\]
+    such that
+    \[(x_1, \ldots, x_n) \in \rho_{\mathcal{P}}(\tau_1) \times \cdots \times \rho_{\mathcal{P}}(\tau_n) \Rightarrow \sigma(f)(x_1, \ldots, x_n) \in \rho_{\mathcal{P}}(\tau).\]
+\end{itemize}
+
+\medskip
+\pause
+
+Note that $\sigma(c) \in \mathcal{P}\lBrace \tau \rBrace_{\rho}$ and $\sigma(f) \in \mathcal{P}\lBrace \tau_1 \times \cdots \times \tau_n \rightarrow \tau \rBrace_{\rho}$, as well as that $\sigma(c) \in \llbracket \tau \rrbracket_{\rho_{\mathcal{A}}}$ and $\sigma(f) \in \llbracket \tau_1 \times \cdots \times \tau_n \rightarrow \tau \rrbracket_{\rho_{\mathcal{A}}}$.
+
+\medskip
+\pause
+
+If we want to forget that $\sigma$ preserves our predicates, we will write $\sigma_{\mathcal{A}}$.
+
+\end{frame}
+
+\begin{frame}
+\frametitle{Logical Relations Semantics for Terms in Context}
+
+\pause
+
+Fix a fixed $\rho$ and $\sigma$, we want to define the meaning of a lambda term.
+In a context $\Gamma = x_1 : \alpha_1, \ldots, x_n : \alpha_n$, we want an interpretation of type
+
+\[
+\lBrace \Gamma \vdash M : \alpha \rBrace_{\rho, \sigma} : \mathcal{A}\lBrace \alpha_1 \times \cdots \times \alpha_n \rBrace_\rho \to \mathcal{A}\lBrace \alpha \rBrace_\rho
+\]
+
+such that for all $\gamma \in \mathcal{P}\lBrace \alpha_1 \times \cdots \times \alpha_n \rBrace_\rho$ we have $\lBrace \Gamma \vdash M : \alpha \rBrace_{\rho, \sigma}(\gamma) \in \mathcal{P}\lBrace \alpha \rBrace_\rho$.
+I.e., we map values satisfying our predicate to values satisfying our predicate.
+
+\medskip
+
+How do we define this semantics?
+
+\end{frame}
+
+\begin{frame}
+\frametitle{Fundamental Theorem of Logical Relations}
+
+Recall that $\mathcal{A}\lBrace \alpha \rBrace_{\rho} = \llbracket\alpha \rrbracket_{\rho_{\mathcal{A}}}$.
+Thus, we can define
+
+\[
+\lBrace \Gamma \vdash M : \alpha \rBrace_{\rho, \sigma} : \mathcal{A}\lBrace \alpha_1 \times \cdots \times \alpha_n \rBrace_\rho \to \mathcal{A}\lBrace \alpha \rBrace_\rho
+\]
+
+as $\lBrace \Gamma \vdash M : \alpha \rBrace_{\rho, \sigma} := \llbracket \Gamma \vdash M : \alpha \rrbracket_{\rho_{\mathcal{A}}, \sigma_{\mathcal{A}}}$ if it actually preserves our predicates.
+
+\medskip
+\pause
+
+\begin{theorem}
+    Fix $\rho$ and $\sigma$ for logical relations.
+    For all $\gamma \in \mathcal{P}\lBrace \alpha_1 \times \cdots \times \alpha_n \rBrace_\rho$ we have $\llbracket \Gamma \vdash M : \alpha \rrbracket_{\rho_{\mathcal{A}}, \sigma_{\mathcal{A}}}(\gamma) \in \mathcal{P}\lBrace \alpha \rBrace_\rho$.
+    \begin{proof}
+        Induction on the structure of $M$.
+    \end{proof}
+\end{theorem}
+
+\medskip
+\pause
+
+This is known as the \emph{Fundamental Theorem of Logical Relations}, or the \emph{Basic Lemma of Logical Relations}.
+Note that we had to choose the interpretation $\sigma$ of our constants and built-in functions to respect $\rho_{\mathcal{P}}$.
+\end{frame}
+
+\begin{frame}
+\frametitle{Example Application: Preserving Evenness}
+
+\pause
+
+\begin{itemize}
+    \item Fix the ground types to be $\{\text{Int}\}$.
+    \pause
+    \item Fix a signature $\Sigma = \left(\left\{\underline{n} : n \in \mathbb{Z},\, n \text{ even}\right\}, \left\{\underline{+}, \underline{\times}\right\}\right)$, everything using $\text{Int}$.
+    \pause
+    \item Interpret our ground types with $\rho(\text{Int}) = \left(\left\{2m : m \in \mathbb{Z}\right\}, \mathbb{Z}\right)$.
+    \pause
+    \item Interpret our signature with $\sigma\left(\underline{n}\right) = n, \sigma\left(\underline{+}\right) = +, \sigma\left(\underline{\times}\right) = \times$ and check that our functions preserve even numbers.
+    \pause
+    \item Apply the theorem! For example, for all terms $x : \text{Int} \vdash M : \text{Int}$, we have
+    \[
+    n \in \mathcal{P}\lBrace \text{Int} \rBrace_\rho \Rightarrow \llbracket x : \text{Int} \vdash M : \text{Int} \rrbracket_{\rho_{\mathcal{A}}, \sigma}(n) \in \mathcal{P}\lBrace \text{Int} \rBrace_\rho
+    \]
+    which is equivalent to
+    \[
+    n \text{ even} \Rightarrow \llbracket x : \text{Int} \vdash M : \text{Int} \rrbracket_{\rho_{\mathcal{A}}, \sigma}(n) \text{ even}.
+    \]
+    \vspace{-12pt}
+    \pause
+    \item Can also show that all polynomials with even coefficients preserve evenness.
+    \item Importantly, the theorem also applies to contexts with function types.
+    If we have $f : \text{Int} \to \text{Int}$, we are forced to feed in a function from $\mathcal{P}\lBrace \text{Int} \to \text{Int} \rBrace_\rho$, which are exactly even preserving functions!
+\end{itemize}
+
+\end{frame}
+
+\begin{frame}
+\frametitle{Conclusion}
+
+
+\begin{itemize}
+    \pause
+    \item We saw the
+    \begin{itemize}
+        \item syntax,
+        \item typing rules, and
+        \item set-theoretic denotational semantics
+    \end{itemize}
+     of simply typed lambda calculus with products, ground types, constants, and built-in functions.
+    \pause
+    \item We then extended the denotational semantics to include a predicate at each type, and observed that all of our constructions respected these predicates.
+    \pause
+    \item The preservation gave use the Fundamental Theorem of Logical Relations, which we then applied to an example.
+\end{itemize}
+
+\begin{textblock}{5}[1,0.5](17,4.5)
+    \centering
+    \vskip4pt
+    \pause
+    \includegraphics[scale=0.7]{qr-code.eps}
+\end{textblock}
+
+\end{frame}
+
+\appendix
+
+\begin{frame}
+\frametitle{References}
+
+\printbibliography
 \end{frame}
 
 \begin{frame}
@@ -200,36 +546,6 @@ Here are two examples:
     \item $(\lambda (y : \alpha). y \, x)[x := y] = \lambda (z : \alpha). z \, y$
 \end{itemize}
 
-\end{frame}
-
-\begin{frame}
-\frametitle{Typing Judgments*}
-
-\[
-\infer{\Gamma \vdash x : \alpha}{(x : \alpha) \in \Gamma}
-\qquad
-\infer{\Gamma \vdash \langle \rangle : 1}{}
-\qquad
-\infer{\Gamma \vdash c : \tau}{c : \tau \in \Sigma_{\text{const}}}
-\]
-\pause
-\[
-\infer{\Gamma \vdash f(M_1, \ldots, M_n) : \tau}{\Gamma \vdash M_1 : \tau_1 & \cdots & \Gamma \vdash M_n : \tau_n & f : (\tau_1, \ldots, \tau_n) \rightarrow \tau \in \Sigma_{\text{func}}}
-\]
-\pause
-\[
-\infer{\Gamma \vdash \lambda (x : \alpha). M : \alpha \rightarrow \beta}{\Gamma, x : \alpha \vdash M : \beta}
-\qquad
-\infer{\Gamma \vdash M \, N : \beta}{\Gamma \vdash M : \alpha \rightarrow \beta & \Gamma \vdash N : \alpha}
-\]
-\pause
-\[
-\infer{\Gamma \vdash \langle M_1, M_2 \rangle : \alpha_1 \times \alpha_2}{\Gamma \vdash M_1 : \alpha_1 & \Gamma \vdash M_2 : \alpha_2}
-\qquad
-\infer{\Gamma \vdash \pi_1(M) : \alpha_1}{\Gamma \vdash M : \alpha_1 \times \alpha_2}
-\qquad
-\infer{\Gamma \vdash \pi_2(M) : \alpha_2}{\Gamma \vdash M : \alpha_1 \times \alpha_2}
-\]
 \end{frame}
 
 \begin{frame}
@@ -325,77 +641,6 @@ Note that it is possible to prove everything equals everything else if you choos
 \end{frame}
 
 \begin{frame}
-\frametitle{Set-Theoretic Denotational Semantics for Types*}
-
-Let $\rho$ be a function that assigns a set $\rho(\tau)$ to each ground type $\tau$, e.g., $\rho(\text{Int}) = \mathbb{Z}$, $\rho(\text{Bool}) = \{ \text{true}, \text{false} \}$.
-
-\pause
-\medskip
-
-Then to type $\alpha$, we are going to assign a set $\llbracket \alpha \rrbracket_{\rho}$ as follows:
-
-\begin{itemize}
-    \item $\llbracket \tau \rrbracket_{\rho} = \rho(\tau)$
-    \item $\llbracket 1 \rrbracket_{\rho} = \{\star\}$
-    \item $\llbracket \alpha_1 \times \alpha_2 \rrbracket_{\rho} = \llbracket \alpha_1 \rrbracket_{\rho} \times \llbracket \alpha_2 \rrbracket_{\rho}$
-    \item $\llbracket \alpha \rightarrow \beta \rrbracket_{\rho} = \llbracket \alpha \rrbracket_{\rho} \rightarrow \llbracket \beta \rrbracket_{\rho}$
-\end{itemize}
-
-Where:
-\begin{itemize}
-    \item $\{\star\}$ is a singleton set of exactly one element;
-    \item $\times$ denotes the Cartesian product of sets; and
-    \item $\rightarrow$ denotes the set of functions.
-\end{itemize}
-\end{frame}
-
-\begin{frame}
-\frametitle{Set-Theoretic Denotational Semantics for Signatures}
-
-For a fixed $\rho$ assigning ground types to sets, we can give an interpretation $\sigma$  to the constants and functions of a signature $\Sigma = (\Sigma_{\text{const}}, \Sigma_{\text{func}})$:
-\begin{itemize}
-    \item for each $c : \tau \in \Sigma_{\text{const}}$, an element $\sigma(c) \in \rho(\tau)$; and
-    \item for each $f : (\tau_1, \ldots, \tau_n) \to \tau \in \Sigma_{\text{func}}$, a function $\sigma(f) \in \rho(\tau_1) \times \!\cdots\! \times \rho(\tau_n) \to \rho(\tau)$.
-\end{itemize}
-Note that $\sigma(c) \in \llbracket \tau \rrbracket_{\rho}$ and $\sigma(f) \in \llbracket \tau_1 \times \cdots \times \tau_n \rightarrow \tau \rrbracket_{\rho}$.
-\end{frame}
-
-\begin{frame}
-\frametitle{Set-Theoretic Denotational Semantics for Terms in Context*}
-
-Fix a fixed $\rho$ and $\sigma$, we can define the meaning of a lambda term.
-In a context $\Gamma = x_1 : \alpha_1, \ldots, x_n : \alpha_n$, the denotational semantics of a term $M$ is a function:
-
-\[
-\llbracket \Gamma \vdash M : \alpha \rrbracket_{\rho, \sigma} : \llbracket \alpha_1 \times \cdots \times \alpha_n \rrbracket_\rho \to \llbracket \alpha \rrbracket_\rho
-\]
-
-For a $\Gamma$ as above, we will write $\gamma$ for an element of $\llbracket \alpha_1 \times \cdots \times \alpha_n \rrbracket_\rho$ and write $\gamma(x_i)$ for the $i^{\text{th}}$ component of the tuple.
-\end{frame}
-
-\begin{frame}
-\frametitle{Recursive Definition of Denotation for Terms*}
-
-The denotational semantics $\llbracket \Gamma \vdash M : \alpha \rrbracket_{\rho,\sigma} (\gamma)$ is defined recursively as follows:
-
-\begin{itemize}
-    \item $\llbracket \Gamma \vdash x : \alpha \rrbracket_{\rho,\sigma} (\gamma) = \gamma(x)$
-    \item $\llbracket \Gamma \vdash \langle \rangle : 1 \rrbracket_{\rho,\sigma} (\gamma) = \star$
-    \item $\llbracket \Gamma \vdash c : \tau \rrbracket_{\rho,\sigma} (\gamma) = \sigma(c)$
-    \item $\llbracket \Gamma \vdash f(M_1, \ldots, M_n) : \sigma \rrbracket_{\rho,\sigma} (\gamma) =$ $\phantom{.}\quad\sigma(f)(\llbracket \Gamma \vdash M_1 : \tau_1 \rrbracket_{\rho,\sigma} (\gamma), \ldots, \llbracket \Gamma \vdash M_n : \tau_n \rrbracket_{\rho,\sigma} (\gamma))$
-    \pause
-    \item $\llbracket \Gamma \vdash \lambda (x : \alpha). M : \alpha \rightarrow \beta \rrbracket_{\rho,\sigma} (\gamma) = \lambda v. \llbracket \Gamma, x:\alpha \vdash M : \beta \rrbracket_{\rho,\sigma} (\gamma[x \mapsto v])$
-    \pause
-    \item $\llbracket \Gamma \vdash M \, N : \beta \rrbracket_{\rho,\sigma} (\gamma) = \llbracket M \rrbracket_{\rho,\sigma}(\gamma)(\llbracket N \rrbracket_{\rho,\sigma}(\gamma))$
-    \item $\llbracket \Gamma \vdash \langle M_1, M_2 \rangle : \alpha_1 \times \alpha_2 \rrbracket_{\rho,\sigma} (\gamma) = (\llbracket M_1 \rrbracket_{\rho,\sigma}(\gamma), \llbracket M_2 \rrbracket_{\rho,\sigma}(\gamma))$
-    \item $\llbracket \Gamma \vdash \pi_1(M) : \alpha_1 \rrbracket_{\rho,\sigma} (\gamma) = \pi_1(\llbracket M \rrbracket_{\rho,\sigma}(\gamma))$
-    \item $\llbracket \Gamma \vdash \pi_2(M) : \alpha_2 \rrbracket_{\rho,\sigma} (\gamma) = \pi_2(\llbracket M \rrbracket_{\rho,\sigma}(\gamma))$
-\end{itemize}
-
-Here, $\gamma[x \mapsto v]$ denotes extension of $\gamma$ mapping $x$ to $v$.
-\end{frame}
-
-\begin{frame}
 \frametitle{Soundness}
 
 \begin{theorem}
@@ -415,156 +660,6 @@ Here, $\gamma[x \mapsto v]$ denotes extension of $\gamma$ mapping $x$ to $v$.
 
 Thus, if we respect the axioms, then equivalent terms have equal denotational semantics. This is the minimum we expect from denotational semantics.
 
-\end{frame}
-
-\begin{frame}
-\frametitle{Logical Relations Semantics for Types}
-
-We can view logical relations as a new type of denotational semantics.
-We begin with the types.
-For each type $\alpha$, we're going to define \emph{two sets}, $P$ and $A$, such that $P \subseteq A$.
-The set $P$ is our \emph{predicate}.
-
-\pause
-\medskip
-
-Let $\rho$ be a function that assigns a pair of sets $\left(\rho_{\mathcal{P}}(\tau), \rho_{\mathcal{A}}(\tau)\right)$ to each ground type $\tau$ such that $\rho_{\mathcal{P}}(\tau) \subseteq \rho_{\mathcal{A}}(\tau)$, e.g., $\rho(\text{Int}) = \left(\left\{2m : m \in \mathbb{Z}\right\}, \mathbb{Z}\right)$.
-
-\pause
-\medskip
-
-Then to type $\alpha$, we are going to assign a pair of sets $\lBrace \alpha \rBrace_{\rho} = \left(\mathcal{P}\lBrace \alpha \rBrace_{\rho}, \mathcal{A}\lBrace \alpha \rBrace_{\rho}\right)$ as follows:
-
-\begin{itemize}
-    \item $\lBrace \tau \rBrace_{\rho} = \left(\rho_{\mathcal{P}}(\tau), \rho_{\mathcal{A}}(\tau)\right)$
-    \item $\lBrace 1 \rBrace_{\rho} = \left(\{\star\}, \{\star\}\right)$
-    \item $\lBrace \alpha_1 \times \alpha_2 \rBrace_{\rho} = \left(\mathcal{P}\lBrace \alpha_1 \rBrace_{\rho} \times \mathcal{P}\lBrace \alpha_2 \rBrace_{\rho}, \mathcal{A}\lBrace \alpha_1 \rBrace_{\rho} \times \mathcal{A}\lBrace \alpha_2 \rBrace_{\rho}\right)$
-    \item $\lBrace \alpha \rightarrow \beta \rBrace_{\rho} = \left(\left\{ f : \forall x \in \mathcal{P}\lBrace \alpha \rBrace_{\rho}. f(x) \in \mathcal{P}\lBrace \beta \rBrace_{\rho} \right\},\, \mathcal{A}\lBrace \alpha \rBrace_{\rho} \rightarrow \mathcal{A}\lBrace \beta \rBrace_{\rho}\right)$
-\end{itemize}
-
-Note that $\mathcal{A}\lBrace \alpha \rBrace_{\rho} = \llbracket\alpha \rrbracket_{\rho_{\mathcal{A}}}$.
-
-\end{frame}
-
-\begin{frame}
-\frametitle{Logical Relations Semantics for Signatures}
-
-For a fixed $\rho$ assigning ground types to sets, we can give an interpretation $\sigma$  to the constants and functions of a signature $\Sigma = (\Sigma_{\text{const}}, \Sigma_{\text{func}})$:
-\begin{itemize}
-    \item for each $c : \tau \in \Sigma_{\text{const}}$, an element $\sigma(c) \in \rho_{\mathcal{P}}(\tau)$; and
-    \item for each $f : (\tau_1, \ldots, \tau_n) \to \tau \in \Sigma_{\text{func}}$, a function
-    \[\sigma(f) \in \rho_{\mathcal{A}}(\tau_1) \times \cdots \times \rho_{\mathcal{A}}(\tau_n) \to \rho_{\mathcal{A}}(\tau)\]
-    such that
-    \[(x_1, \ldots, x_n) \in \rho_{\mathcal{P}}(\tau_1) \times \cdots \times \rho_{\mathcal{P}}(\tau_n) \Rightarrow \sigma(f)(x_1, \ldots, x_n) \in \rho_{\mathcal{P}}(\tau).\]
-\end{itemize}
-
-\medskip
-
-Note that $\sigma(c) \in \mathcal{P}\lBrace \tau \rBrace_{\rho}$ and $\sigma(f) \in \mathcal{P}\lBrace \tau_1 \times \cdots \times \tau_n \rightarrow \tau \rBrace_{\rho}$, as well as that $\sigma(c) \in \llbracket \tau \rrbracket_{\rho_{\mathcal{A}}}$ and $\sigma(f) \in \llbracket \tau_1 \times \cdots \times \tau_n \rightarrow \tau \rrbracket_{\rho_{\mathcal{A}}}$.
-
-\medskip
-
-If we want to forget that $\sigma$ preserves our predicates, we will write $\sigma_{\mathcal{A}}$.
-
-\end{frame}
-
-\begin{frame}
-\frametitle{Logical Relations Semantics for Terms in Context}
-
-Fix a fixed $\rho$ and $\sigma$, we want to define the meaning of a lambda term.
-In a context $\Gamma = x_1 : \alpha_1, \ldots, x_n : \alpha_n$, we want an interpretation of type
-
-\[
-\lBrace \Gamma \vdash M : \alpha \rBrace_{\rho, \sigma} : \mathcal{A}\lBrace \alpha_1 \times \cdots \times \alpha_n \rBrace_\rho \to \mathcal{A}\lBrace \alpha \rBrace_\rho
-\]
-
-such that for all $\gamma \in \mathcal{P}\lBrace \alpha_1 \times \cdots \times \alpha_n \rBrace_\rho$ we have $\lBrace \Gamma \vdash M : \alpha \rBrace_{\rho, \sigma}(\gamma) \in \mathcal{P}\lBrace \alpha \rBrace_\rho$.
-I.e., we map values satisfying our predicate to values satisfying our predicate.
-
-\medskip
-
-How do we define this semantics?
-
-\end{frame}
-
-\begin{frame}
-\frametitle{Fundamental Theorem of Logical Relations}
-
-Recall that $\mathcal{A}\lBrace \alpha \rBrace_{\rho} = \llbracket\alpha \rrbracket_{\rho_{\mathcal{A}}}$.
-Thus, we can define
-
-\[
-\lBrace \Gamma \vdash M : \alpha \rBrace_{\rho, \sigma} : \mathcal{A}\lBrace \alpha_1 \times \cdots \times \alpha_n \rBrace_\rho \to \mathcal{A}\lBrace \alpha \rBrace_\rho
-\]
-
-as $\lBrace \Gamma \vdash M : \alpha \rBrace_{\rho, \sigma} := \llbracket \Gamma \vdash M : \alpha \rrbracket_{\rho_{\mathcal{A}}, \sigma_{\mathcal{A}}}$ if it actually preserves our predicates.
-
-\medskip
-
-\begin{theorem}
-    Fix $\rho$ and $\sigma$ for logical relations.
-    For all $\gamma \in \mathcal{P}\lBrace \alpha_1 \times \cdots \times \alpha_n \rBrace_\rho$ we have $\llbracket \Gamma \vdash M : \alpha \rrbracket_{\rho_{\mathcal{A}}, \sigma_{\mathcal{A}}}(\gamma) \in \mathcal{P}\lBrace \alpha \rBrace_\rho$.
-    \begin{proof}
-        Induction on the structure of $M$.
-    \end{proof}
-\end{theorem}
-
-\medskip
-
-This is known as the \emph{Fundamental Theorem of Logical Relations}, or the \emph{Basic Lemma of Logical Relations}.
-Note that we had to choose the interpretation $\sigma$ of our constants and built-in functions to respect $\rho_{\mathcal{P}}$.
-\end{frame}
-
-\begin{frame}
-\frametitle{Example Application: Preserving Evenness}
-
-\begin{itemize}
-    \item Fix the ground types to be $\{\text{Int}\}$.
-    \pause
-    \item Fix a signature $\Sigma = \left(\left\{\underline{n} : n \in \mathbb{Z},\, n \text{ even}\right\}, \left\{\underline{+}, \underline{\times}\right\}\right)$, everything using $\text{Int}$.
-    \pause
-    \item Interpret our ground types with $\rho(\text{Int}) = \left(\left\{2m : m \in \mathbb{Z}\right\}, \mathbb{Z}\right)$.
-    \pause
-    \item Interpret our signature with $\sigma\left(\underline{n}\right) = n, \sigma\left(\underline{+}\right) = +, \sigma\left(\underline{\times}\right) = \times$ and check that our functions preserve even numbers.
-    \pause
-    \item Apply the theorem! For example, for all terms $x : \text{Int} \vdash M : \text{Int}$, we have
-    \[
-    n \in \mathcal{P}\lBrace \text{Int} \rBrace_\rho \Rightarrow \llbracket x : \text{Int} \vdash M : \text{Int} \rrbracket_{\rho_{\mathcal{A}}, \sigma}(n) \in \mathcal{P}\lBrace \text{Int} \rBrace_\rho
-    \]
-    which is equivalent to
-    \[
-    n \text{ even} \Rightarrow \llbracket x : \text{Int} \vdash M : \text{Int} \rrbracket_{\rho_{\mathcal{A}}, \sigma}(n) \text{ even}.
-    \]
-    \vspace{-12pt}
-    \pause
-    \item Can also show that all polynomials with even coefficients preserve evenness.
-    \item Importantly, the theorem also applies to contexts with function types.
-    If we have $f : \text{Int} \to \text{Int}$, we are forced to feed in a function from $\mathcal{P}\lBrace \text{Int} \to \text{Int} \rBrace_\rho$, which are exactly even preserving functions!
-\end{itemize}
-
-\end{frame}
-
-\begin{frame}
-\frametitle{Conclusion}
-
-\begin{itemize}
-    \item We saw the
-    \begin{itemize}
-        \item syntax,
-        \item typing rules,
-        \item equational rules, and
-        \item set-theoretic denotational semantics
-    \end{itemize}
-     of simply typed lambda calculus with products, ground types, constants, and built-in functions.
-    \item We then extended the denotational semantics to include a predicate at each type, and observed that all of our constructions respected these predicates.
-    \item The preservation gave use the Fundamental Theorem of Logical Relations, which we then applied to an example.
-\end{itemize}
-\end{frame}
-
-\begin{frame}
-\frametitle{References}
-
-\printbibliography
 \end{frame}
 
 \end{document}
